@@ -1,0 +1,220 @@
+/* =============================================================
+   EDITOR.CSS — Estilos de la página del editor de grafos
+   Contiene: layout de dos columnas, paneles de formulario,
+   preview del grafo, chips de nodos/aristas, grafos guardados.
+   ============================================================= */
+
+/* --- Layout principal del editor (dos columnas) --- */
+.editor-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    flex: 1;
+    overflow: hidden;
+}
+
+.editor-panel {
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(100vh - var(--header-height) - 1px);
+}
+
+.editor-form-panel {
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.editor-preview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-primary);
+}
+
+/* --- Secciones dentro de los paneles --- */
+.panel-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title svg {
+    color: var(--accent);
+}
+
+/* --- Preview del grafo en el editor --- */
+.preview-canvas-wrapper {
+    position: relative;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    height: 220px;
+    overflow: hidden;
+}
+
+.preview-canvas-wrapper canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.preview-canvas-wrapper .empty-state {
+    position: absolute;
+    inset: 0;
+}
+
+/* --- Resumen del grafo actual (nodos y aristas) --- */
+.graph-summary {
+    display: flex;
+    gap: 16px;
+    padding: 8px 0;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.summary-label {
+    color: var(--text-muted);
+}
+
+.summary-value {
+    color: var(--accent);
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+/* --- Chips (etiquetas de nodos y aristas) --- */
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.list-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    animation: chipIn 0.2s ease;
+}
+
+@keyframes chipIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.chip .chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.chip .chip-remove {
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.chip .chip-remove:hover {
+    color: var(--danger);
+}
+
+.empty-chip {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* --- Lista de grafos guardados --- */
+.saved-graphs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.saved-graph-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+    animation: chipIn 0.25s ease;
+}
+
+.saved-graph-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.saved-graph-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.saved-graph-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.saved-graph-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 10px;
+}
+
+.saved-graph-actions {
+    display: flex;
+    gap: 6px;
+}
