@@ -156,15 +156,15 @@ const Visualizer = (() => {
      * tocan a alguno de los círculos (nodos) dibujados.
      * ¿Qué devuelve?: El objeto del nodo si lo tocó, o null si tocó el fondo vacío.
      */
-    function findNodeAt(sx, sy) {
-        const { x, y } = screenToWorld(sx, sy);
+    function findNodeAt(sx, sy) { // Nota: En resumen es para saber si tocaste un nodo
+        const { x, y } = screenToWorld(sx, sy); //Nota: Coordenadas en bruto
         // Recorremos los nodos al revés (para agarrar el que esté pintado más arriba)
         for (let i = nodes.length - 1; i >= 0; i--) {
             const n = nodes[i];
             // Fórmula de la distancia entre dos puntos (Teorema de Pitágoras)
             const dx = x - n.x;
             const dy = y - n.y;
-            // Si la distancia al centro es menor al radio, ¡hizo clic en el nodo!
+            // Si la distancia al centro es menor al radio | Nota: Es para agarrar el centro del nodo
             if (dx * dx + dy * dy <= (NODE_RADIUS + 4) * (NODE_RADIUS + 4)) return n;
         }
         return null;
@@ -191,11 +191,19 @@ const Visualizer = (() => {
     function onMouseMove(e) {
         if (isDragging && dragNode) {
             // Movemos el nodo a las nuevas coordenadas del ratón
-            const { x, y } = screenToWorld(e.clientX, e.clientY);
+            const { x, y } = screenToWorld(e.clientX, e.clientY); //Nota: Bloqueamos la vista para q no se mueva
             dragNode.x = x;
             dragNode.y = y;
             dragNode.vx = 0; // Le quitamos su "velocidad" física
             dragNode.vy = 0;
+
+            // Reactivamos ("calentamos") la simulación para que los demás nodos reaccionen al movimiento
+            simulationAlpha = 0.5; // Un valor intermedio para que se mueva suavemente
+            if (!simulationRunning) {
+                simulationRunning = true;
+                runSimulation();
+            }
+
             render();
         } else if (isPanning) {
             // Movemos la cámara
@@ -204,7 +212,7 @@ const Visualizer = (() => {
             render();
         } else {
             // Solo hover (pasar el ratón por encima sin dar clic)
-            const node = findNodeAt(e.clientX, e.clientY);
+            const node = findNodeAt(e.clientX, e.clientY); //tocaste un nodo?
             canvas.style.cursor = node ? 'grab' : 'default'; // Si pasa por un nodo, pone la "manito"
         }
     }
@@ -214,6 +222,13 @@ const Visualizer = (() => {
         if (dragNode) {
             dragNode.fixed = false; // El nodo vuelve a estar sujeto a las físicas
             dragNode = null;
+
+            // Al soltarlo, le damos un último empujón a la física para que se acomode si quedó muy cerca de otros
+            simulationAlpha = 0.5;
+            if (!simulationRunning) {
+                simulationRunning = true;
+                runSimulation();
+            }
         }
         isDragging = false;
         isPanning = false;
@@ -445,7 +460,7 @@ const Visualizer = (() => {
             if (!source || !target) return;
 
             // Empezamos a trazar un nuevo camino
-            ctx.beginPath(); // guia-js.md
+            ctx.beginPath(); // guia-js.md | Nota: Es como levantar el lapiz al escribir otra linea
             ctx.strokeStyle = 'rgba(108, 99, 255, 0.35)'; // Color morado translúcido
             ctx.lineWidth = 2; // Grosor
 
@@ -459,7 +474,7 @@ const Visualizer = (() => {
                 // Caso normal: línea recta entre nodos
                 ctx.moveTo(source.x, source.y); // guia-js.md | // Pone el lápiz en el origen
                 ctx.lineTo(target.x, target.y); // guia-js.md | // Traza recta al destino
-                ctx.stroke(); // guia-js.md
+                ctx.stroke(); // guia-js.md | // Dibuja la línea
 
                 // Si el grafo es dirigido, dibujamos una cabeza de flecha
                 if (isDirected) {
