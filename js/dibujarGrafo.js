@@ -304,14 +304,14 @@ const Visualizer = (() => {
         if (!simulationRunning) return;
 
         // Para acelerar la animación, aplicamos las físicas 3 veces por cada fotograma de video
-        const ITERATIONS = 3;
+        const ITERATIONS = 2;
         for (let iter = 0; iter < ITERATIONS; iter++) {
             simulateStep();
         }
 
         // Cada fotograma que pasa, el grafo "se enfría" un 3%. 
         // Cuando llegue casi a 0, detenemos la simulación para no gastar batería de la PC.
-        simulationAlpha *= 0.97;
+        simulationAlpha *= 0.96;
         if (simulationAlpha < 0.005) {
             simulationRunning = false;
         }
@@ -328,21 +328,25 @@ const Visualizer = (() => {
      * 3. Una gravedad central tira de todos los nodos levemente hacia el medio de la pantalla.
      */
     function simulateStep() {
-        const repulsion = 5000;
-        const attraction = 0.008;
-        const damping = 0.85; // Fricción, para que no vibren por siempre
+        const repulsion = 15000;
+        const attraction = 0.004;
+        const damping = 0.75; // Fricción, para que no vibren por siempre
         const alpha = simulationAlpha; // Modificador general que va disminuyendo
 
         // Repulsión: Todos contra todos
-        for (let i = 0; i < nodes.length; i++) {
-            for (let j = i + 1; j < nodes.length; j++) {
-                let dx = nodes[j].x - nodes[i].x;
-                let dy = nodes[j].y - nodes[i].y;
-                let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        for (let i = 0; i < nodes.length; i++) {//Todos los nodos
+            for (let j = i + 1; j < nodes.length; j++) {//El nodo revisa todos los nodos menos a sí mismo
+                let dx = nodes[j].x - nodes[i].x; // Distancia en x
+                let dy = nodes[j].y - nodes[i].y; // Distancia en y
+                let dist = Math.sqrt(dx * dx + dy * dy) || 1; // Distancia euclidiana
+
                 // Entre más cerca estén, más fuerte se repelen
-                let force = (repulsion / (dist * dist)) * alpha;
+                let force = (repulsion / (dist * dist)) * alpha; // Fuerza de repulsión
+
+                // Aplicamos la fuerza a ambos nodos en direcciones opuestas
                 let fx = (dx / dist) * force;
                 let fy = (dy / dist) * force;
+
                 // Empujamos a ambos en direcciones opuestas usando sus variables de velocidad (v)
                 if (!nodes[i].fixed) { nodes[i].vx -= fx; nodes[i].vy -= fy; }
                 if (!nodes[j].fixed) { nodes[j].vx += fx; nodes[j].vy += fy; }
@@ -351,9 +355,11 @@ const Visualizer = (() => {
 
         // Atracción: Solo entre los nodos que están conectados por una línea
         edges.forEach(e => {
+            // Busca los nodos reales usando los IDs del edge
             const source = nodes.find(n => n.id === e.from);
             const target = nodes.find(n => n.id === e.to);
-            if (!source || !target) return;
+            if (!source || !target) return; //Filtramos los que no estan conectados
+
             let dx = target.x - source.x;
             let dy = target.y - source.y;
             let dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -370,15 +376,16 @@ const Visualizer = (() => {
         const ch = canvas.height / devicePixelRatio;
         const gravity = 0.02 * alpha;
         nodes.forEach(n => {
-            if (n.fixed) return;
-            n.vx += (cw / 2 - n.x) * gravity;
-            n.vy += (ch / 2 - n.y) * gravity;
+            if (n.fixed) return; // Nota: Excluye el nodo que tengas agarrado
+            n.vx += (cw / 2 - n.x) * gravity; // Aplica fuerza en X hacia el centro (cw = centro de ancho)
+            n.vy += (ch / 2 - n.y) * gravity; // Aplica fuerza en Y hacia el centro (ch = centro de alto) 
         });
 
         // Finalmente, actualizamos la posición XY de cada nodo sumándole la velocidad calculada
         nodes.forEach(n => {
             if (n.fixed) return;
-            n.vx *= damping; // Aplicar fricción (se pierde el 15% de energía)
+            // Aplicar fricción con el aire (damping)
+            n.vx *= damping;
             n.vy *= damping;
             n.x += n.vx;
             n.y += n.vy;
