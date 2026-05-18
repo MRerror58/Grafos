@@ -1,25 +1,22 @@
 /**
- * ============================================================
- * ALMACENAMIENTO.JS — Manejo de datos de grafos en localStorage
- * ============================================================
- * Este módulo se encarga SOLO de los datos:
- * - Leer grafos guardados
- * - Guardar un grafo nuevo o sobrescribir uno existente
- * - Eliminar un grafo
- * - Buscar grafos por ID o por nombre
- *
- * NO toca la interfaz. Solo trabaja con datos.
- * ============================================================
+ * Almacenamiento Module — Manejo de datos de grafos en localStorage.
+ * 
+ * Utiliza el Patrón Módulo (IIFE: Immediately Invoked Function Expression).
+ * ¿Por qué?: Para encapsular (proteger) la lógica de lectura y escritura de la 
+ * base de datos local (localStorage), separándola del resto de la interfaz (Editor, Visualizer).
  */
-const Almacenamiento = (function () {
+const Almacenamiento = (() => {
 
     // Clave que se usa para guardar los grafos en el navegador (localStorage)
     const CLAVE_STORAGE = 'graphlab_saved_graphs';
 
-
-    // --- LEER ---
-    // Devuelve un arreglo con todos los grafos guardados.
-    // Si no hay ninguno o hay un error, devuelve un arreglo vacío.
+    /**
+     * Función: obtenerGrafos
+     * ¿Qué recibe?: Nada.
+     * ¿Qué hace?: Saca los datos del localStorage y los convierte de texto a código JS usable.
+     * ¿Qué devuelve?: Un arreglo completo de grafos guardados, o un arreglo vacío [] si no hay nada.
+     * ¿Por qué existe?: Porque localStorage solo guarda texto puro.
+     */
     function obtenerGrafos() {
         try {
             return JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
@@ -28,26 +25,40 @@ const Almacenamiento = (function () {
         }
     }
 
-
-    // --- BUSCAR ---
-    // Busca un grafo por su ID único. Devuelve el grafo o null.
+    /**
+     * Función: buscarPorId
+     * ¿Qué recibe?: 
+     *  - id (texto): El identificador único del grafo.
+     * ¿Qué hace?: Recorre todos los grafos guardados y busca el que coincida con el ID dado.
+     * ¿Qué devuelve?: El objeto grafo, o 'null' si no lo encuentra.
+     */
     function buscarPorId(id) {
         const guardados = obtenerGrafos();
         return guardados.find(g => g.id === id) || null;
     }
 
-    // Busca un grafo por nombre (ignora mayúsculas/minúsculas).
-    // Se usa para detectar si ya existe un grafo con ese nombre antes de guardar.
+    /**
+     * Función: buscarPorNombre
+     * ¿Qué recibe?: 
+     *  - nombre (texto): El nombre del grafo a buscar.
+     * ¿Qué hace?: Busca un grafo que tenga el mismo nombre, ignorando mayúsculas y minúsculas.
+     * ¿Qué devuelve?: El objeto grafo, o 'null' si no lo encuentra.
+     * ¿Por qué existe?: Para evitar que el usuario guarde dos grafos diferentes con el mismo nombre accidentalmente.
+     */
     function buscarPorNombre(nombre) {
         const guardados = obtenerGrafos();
         return guardados.find(g => g.name.toLowerCase() === nombre.toLowerCase()) || null;
     }
 
-
-    // --- GUARDAR ---
-    // Guarda un grafo. Si se pasa un idExistente, reemplaza ese grafo.
-    // Si no, crea uno nuevo con un ID basado en la fecha actual.
-    // Devuelve el objeto del grafo que se guardó.
+    /**
+     * Función: guardarGrafo
+     * ¿Qué recibe?: 
+     *  - datosGrafo (objeto): La información actual del grafo (nombre, nodos, aristas, etc.).
+     *  - idExistente (texto, opcional): El ID si es que estamos sobrescribiendo uno antiguo.
+     * ¿Qué hace?: Empaqueta todo el estado actual, le genera una fecha y un ID (si es nuevo),
+     * y lo inserta/reemplaza en la memoria del navegador.
+     * ¿Qué devuelve?: El objeto del grafo final que se guardó.
+     */
     function guardarGrafo(datosGrafo, idExistente = null) {
         const id = idExistente || ('g_' + Date.now());
 
@@ -79,17 +90,20 @@ const Almacenamiento = (function () {
         return grafoAGuardar;
     }
 
-
-    // --- ELIMINAR ---
-    // Elimina un grafo por su ID.
+    /**
+     * Función: eliminarGrafo
+     * ¿Qué recibe?: 
+     *  - id (texto): El identificador único del grafo a borrar.
+     * ¿Qué hace?: Filtra la lista para excluir este grafo y guarda la lista resultante de nuevo.
+     * ¿Qué devuelve?: Nada.
+     */
     function eliminarGrafo(id) {
         let guardados = obtenerGrafos();
         guardados = guardados.filter(g => g.id !== id);
         localStorage.setItem(CLAVE_STORAGE, JSON.stringify(guardados));
     }
 
-
-    // Lo que otros archivos pueden usar de este módulo
+    // Exponemos (hacemos públicas) las funciones que el Editor u otros necesitan usar.
     return {
         obtenerGrafos,
         buscarPorId,
@@ -97,5 +111,4 @@ const Almacenamiento = (function () {
         guardarGrafo,
         eliminarGrafo
     };
-
 })();

@@ -1,142 +1,212 @@
 /**
- * ============================================================
- * DIBUJAR GRAFO — Renderiza grafos en canvas
- * ============================================================
- * Este módulo se encarga de TODO lo visual del grafo:
- * - Dibujar nodos (círculos con color y etiqueta)
- * - Dibujar aristas (líneas entre nodos, con flechas si es dirigido)
- * - Layout automático con algoritmo "force-directed" (los nodos se acomodan solos)
- * - Interacción: zoom con rueda, arrastrar nodos, desplazar el canvas
- * - Mini-preview para el editor
- *
- * Usa el nombre "Visualizer" como módulo para que el editor y la app
- * puedan llamar a Visualizer.loadGraph(), Visualizer.renderPreview(), etc.
- * ============================================================
+ * Visualizer Module (dibujarGrafo.js) — Renderiza grafos en un canvas usando layout de fuerzas.
+ * 
+ * Este módulo dibuja físicamente los círculos (nodos) y las líneas (aristas) en pantalla.
+ * Usa matemáticas para simular físicas (atracción y repulsión) para que el grafo se organice solo.
+ * Utiliza el Patrón Módulo (IIFE) para no chocar con las variables del editor.
  */
-const Visualizer = (function () {
+const Visualizer = (() => {
+    // Variables globales para el dibujo
+    let canvas, ctx;    // canvas es el lienzo HTML, ctx es el "pincel" 2D
+    let nodes = [];     // Lista de nodos a dibujar
+    let edges = [];     // Lista de conexiones a dibujar
+    let graphData = null; // Toda la información del grafo cargado
 
-    // ===================================================================
-    // CONSTANTES
-    // ===================================================================
+    // Cámara / Vista (Para el Zoom y el Desplazamiento)
+    let offsetX = 0, offsetY = 0; // Cuánto se ha movido la cámara en X y Y
+    let scale = 1;                // Nivel de zoom (1 = 100%)
+    let isPanning = false;        // ¿El usuario está arrastrando el fondo?
+    let panStart = { x: 0, y: 0 }; // Coordenada donde el usuario empezó a arrastrar
 
-    const NODE_RADIUS = 22; // Tamaño de cada nodo en pixeles
+    // Interacción con los nodos
+    let dragNode = null;          // Nodo que el usuario está agarrando en este momento
+    let isDragging = false;       // ¿El usuario está arrastrando un nodo?
 
-    // Colores predeterminados para nodos que no tienen color asignado
+    // Opciones visuales
+    let showLabels = true;        // Mostrar/Ocultar nombres de nodos
+    let showWeights = true;       // Mostrar/Ocultar números de las aristas
+
+    // Animación de físicas
+    let animFrame = null;         // Referencia a la animación para poder detenerla
+    let simulationRunning = false;// ¿Están las físicas calculándose?
+    let simulationAlpha = 1;      // "Temperatura" de la simulación. Empieza en 1 y baja a 0.
+
+    // Paleta de colores por defecto para los nodos
     const DEFAULT_COLORS = [
         '#6C63FF', '#00D4AA', '#FF6B9D', '#FFB347',
         '#4ECDC4', '#A78BFA', '#F472B6', '#34D399',
         '#FB923C', '#60A5FA', '#C084FC', '#22D3EE'
     ];
 
+    const NODE_RADIUS = 22; // Tamaño del círculo del nodo
 
-    // ===================================================================
-    // ESTADO INTERNO (variables que solo usa este módulo)
-    // ===================================================================
-
-    let canvas, ctx;           // El canvas HTML y su contexto 2D
-    let nodes = [];            // Nodos con posiciones x, y calculadas
-    let edges = [];            // Aristas del grafo actual
-    let graphData = null;      // Datos originales del grafo cargado
-
-    // Cámara: controla qué parte del canvas se ve
-    let offsetX = 0, offsetY = 0; // Desplazamiento (pan)
-    let scale = 1;                // Nivel de zoom
-
-    // Control de interacciones del ratón
-    let isPanning = false;
-    let panStart = { x: 0, y: 0 };
-    let dragNode = null;
-    let isDragging = false;
-
-    // Opciones de visualización (se activan/desactivan con los botones)
-    let showLabels = true;
-    let showWeights = true;
-
-    // Simulación del layout force-directed
-    let animFrame = null;
-    let simulationRunning = false;
-    let simulationAlpha = 1; // "Energía" de la simulación, se reduce hasta que se detiene
-
-
-    // ===================================================================
-    // INICIALIZACIÓN
-    // ===================================================================
-
-    // Prepara el canvas y conecta todos los eventos
+    /**
+     * Función: init
+     * ¿Qué recibe?: Nada.
+     * ¿Qué hace?: Configura el lienzo (canvas) buscando su elemento en el HTML, ajusta 
+     * su tamaño para que quepa en la pantalla y le conecta los eventos del ratón.
+     * ¿Qué devuelve?: Nada.
+     */
     function init() {
         canvas = document.getElementById('graph-canvas');
-        ctx = canvas.getContext('2d');
+        ctx = canvas.getContext('2d'); // Pedimos un contexto 2D para poder dibujar formas
+        
         resizeCanvas();
+        // Si el usuario cambia el tamaño de la ventana del navegador, reajustamos el canvas
         window.addEventListener('resize', resizeCanvas);
+        
         bindCanvasEvents();
         bindControlEvents();
     }
 
-    // Ajusta el tamaño del canvas al tamaño de su contenedor
-    // (necesario para que se vea nítido en pantallas de alta resolución)
+    /**
+     * Función: resizeCanvas
+     * ¿Qué hace?: Toma las dimensiones de la caja padre en el HTML y ajusta la 
+     * resolución interna del canvas multiplicándola por el "devicePixelRatio" 
+     * para que no se vea borroso en pantallas modernas (como las Retina de Mac).
+     */
     function resizeCanvas() {
         const parent = canvas.parentElement;
         canvas.width = parent.clientWidth * devicePixelRatio;
         canvas.height = parent.clientHeight * devicePixelRatio;
         canvas.style.width = parent.clientWidth + 'px';
         canvas.style.height = parent.clientHeight + 'px';
+        
+        // Ajustamos la escala base del dibujo
         ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        
+        // Si ya hay un grafo cargado, lo repintamos
         if (graphData) render();
     }
 
-
-    // ===================================================================
-    // EVENTOS DEL CANVAS (ratón: clic, arrastrar, rueda)
-    // ===================================================================
-
+    /**
+     * Función: bindCanvasEvents
+     * ¿Qué hace?: "Enchufa" los detectores de ratón directamente sobre el canvas.
+     */
     function bindCanvasEvents() {
-        canvas.addEventListener('mousedown', onMouseDown);
-        canvas.addEventListener('mousemove', onMouseMove);
-        canvas.addEventListener('mouseup', onMouseUp);
-        canvas.addEventListener('mouseleave', onMouseUp);
-        canvas.addEventListener('wheel', onWheel, { passive: false });
-        canvas.addEventListener('dblclick', onDoubleClick);
+        canvas.addEventListener('mousedown', onMouseDown);   // Cuando el usuario presiona el clic
+        canvas.addEventListener('mousemove', onMouseMove);   // Cuando mueve el ratón
+        canvas.addEventListener('mouseup', onMouseUp);       // Cuando suelta el clic
+        canvas.addEventListener('mouseleave', onMouseUp);    // Cuando el ratón sale de la zona del canvas
+        // wheel es la rueda del ratón (para hacer zoom)
+        canvas.addEventListener('wheel', onWheel, { passive: false }); 
+        canvas.addEventListener('dblclick', onDoubleClick);  // Doble clic para centrar la cámara
     }
 
-    // Al hacer clic: si hay un nodo debajo, lo arrastramos; si no, movemos el canvas
+    /**
+     * Función: bindControlEvents
+     * ¿Qué hace?: Conecta los botones de la interfaz de usuario (Zoom In, Out, Mostrar Etiquetas)
+     * a las variables de estado que controlan la cámara y vuelve a dibujar el canvas.
+     */
+    function bindControlEvents() {
+        document.getElementById('btn-zoom-in').addEventListener('click', () => {
+            scale = Math.min(scale * 1.25, 5); // Aumenta la escala (máximo 5x)
+            render();
+        });
+        document.getElementById('btn-zoom-out').addEventListener('click', () => {
+            scale = Math.max(scale / 1.25, 0.2); // Disminuye la escala (mínimo 0.2x)
+            render();
+        });
+        document.getElementById('btn-reset-view').addEventListener('click', () => {
+            scale = 1; offsetX = 0; offsetY = 0; // Resetea cámara
+            if (graphData) centerGraph(); // Centra el contenido en pantalla
+            render();
+        });
+        document.getElementById('btn-toggle-labels').addEventListener('click', function() {
+            showLabels = !showLabels; // Invierte el valor (true a false y viceversa)
+            this.classList.toggle('active', showLabels);
+            render();
+        });
+        document.getElementById('btn-toggle-weights').addEventListener('click', function() {
+            showWeights = !showWeights;
+            this.classList.toggle('active', showWeights);
+            render();
+        });
+    }
+
+    /**
+     * Función: screenToWorld
+     * ¿Qué recibe?: 
+     *  - sx (número): coordenada X de la pantalla.
+     *  - sy (número): coordenada Y de la pantalla.
+     * ¿Qué hace?: Las matemáticas necesarias para convertir dónde hiciste clic en la pantalla física,
+     * a en qué punto imaginario del "mundo infinito" del canvas estás, considerando el Zoom y la Cámara.
+     * ¿Qué devuelve?: Objeto { x, y } con las coordenadas reales.
+     */
+    function screenToWorld(sx, sy) {
+        const rect = canvas.getBoundingClientRect(); // Posición del canvas en el HTML
+        // Deshacemos matemáticamente el desplazamiento y luego la escala
+        const x = (sx - rect.left - offsetX) / scale;
+        const y = (sy - rect.top - offsetY) / scale;
+        return { x, y };
+    }
+
+    /**
+     * Función: findNodeAt
+     * ¿Qué recibe?: 
+     *  - sx (número): coordenada X de la pantalla.
+     *  - sy (número): coordenada Y de la pantalla.
+     * ¿Qué hace?: Dado un clic del usuario en pantalla, revisa si las coordenadas 
+     * tocan a alguno de los círculos (nodos) dibujados.
+     * ¿Qué devuelve?: El objeto del nodo si lo tocó, o null si tocó el fondo vacío.
+     */
+    function findNodeAt(sx, sy) {
+        const { x, y } = screenToWorld(sx, sy);
+        // Recorremos los nodos al revés (para agarrar el que esté pintado más arriba)
+        for (let i = nodes.length - 1; i >= 0; i--) {
+            const n = nodes[i];
+            // Fórmula de la distancia entre dos puntos (Teorema de Pitágoras)
+            const dx = x - n.x;
+            const dy = y - n.y;
+            // Si la distancia al centro es menor al radio, ¡hizo clic en el nodo!
+            if (dx * dx + dy * dy <= (NODE_RADIUS + 4) * (NODE_RADIUS + 4)) return n;
+        }
+        return null;
+    }
+
+    // ===== EVENTOS DEL RATÓN EN EL CANVAS =====
+
     function onMouseDown(e) {
         const node = findNodeAt(e.clientX, e.clientY);
         if (node) {
+            // Si tocó un nodo, lo agarra para arrastrarlo
             dragNode = node;
             isDragging = true;
-            node.fixed = true;
-            canvas.style.cursor = 'grabbing';
+            node.fixed = true; // Lo anclamos para que las físicas no se lo lleven
+            canvas.style.cursor = 'grabbing'; // Cambiamos el cursor a "mano cerrada"
         } else {
+            // Si tocó el fondo vacío, empieza a arrastrar la cámara
             isPanning = true;
             panStart = { x: e.clientX - offsetX, y: e.clientY - offsetY };
             canvas.style.cursor = 'grabbing';
         }
     }
 
-    // Al mover el ratón: arrastra nodo o desplaza canvas
     function onMouseMove(e) {
         if (isDragging && dragNode) {
+            // Movemos el nodo a las nuevas coordenadas del ratón
             const { x, y } = screenToWorld(e.clientX, e.clientY);
             dragNode.x = x;
             dragNode.y = y;
-            dragNode.vx = 0;
+            dragNode.vx = 0; // Le quitamos su "velocidad" física
             dragNode.vy = 0;
             render();
         } else if (isPanning) {
+            // Movemos la cámara
             offsetX = e.clientX - panStart.x;
             offsetY = e.clientY - panStart.y;
             render();
         } else {
-            // Cambiar cursor si estamos sobre un nodo
+            // Solo hover (pasar el ratón por encima sin dar clic)
             const node = findNodeAt(e.clientX, e.clientY);
-            canvas.style.cursor = node ? 'grab' : 'default';
+            canvas.style.cursor = node ? 'grab' : 'default'; // Si pasa por un nodo, pone la "manito"
         }
     }
 
-    // Al soltar el ratón: dejar de arrastrar
     function onMouseUp() {
+        // Cuando suelta el clic, soltamos el nodo o la cámara
         if (dragNode) {
-            dragNode.fixed = false;
+            dragNode.fixed = false; // El nodo vuelve a estar sujeto a las físicas
             dragNode = null;
         }
         isDragging = false;
@@ -144,196 +214,121 @@ const Visualizer = (function () {
         canvas.style.cursor = 'default';
     }
 
-    // Zoom con la rueda del ratón (hacia el punto donde está el cursor)
     function onWheel(e) {
+        // e.preventDefault() evita que la página web entera haga scroll hacia abajo
         e.preventDefault();
+        
+        // Si la rueda gira hacia adelante, acerca el zoom. Si no, lo aleja.
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
+        
+        // Calculamos la nueva escala manteniéndola entre 0.15 y 5
         const newScale = Math.max(0.15, Math.min(5, scale * delta));
-
-        // Ajustar desplazamiento para que el zoom se centre en el cursor
+        
+        // Matemáticas para hacer el zoom exactamente donde está el ratón apuntando
         offsetX = mx - (mx - offsetX) * (newScale / scale);
         offsetY = my - (my - offsetY) * (newScale / scale);
+        
         scale = newScale;
-        render();
+        render(); // Repintamos todo con la nueva cámara
     }
 
-    // Doble clic: centrar y resetear vista
     function onDoubleClick() {
         if (graphData) {
-            scale = 1;
-            offsetX = 0;
-            offsetY = 0;
+            scale = 1; offsetX = 0; offsetY = 0;
             centerGraph();
             render();
         }
     }
 
+    // ===== FÍSICAS Y SIMULACIÓN (FORCE-DIRECTED LAYOUT) =====
 
-    // ===================================================================
-    // EVENTOS DE LOS BOTONES DE CONTROL (zoom +/-, reset, etiquetas, pesos)
-    // ===================================================================
-
-    function bindControlEvents() {
-        document.getElementById('btn-zoom-in').addEventListener('click', () => {
-            scale = Math.min(scale * 1.25, 5);
-            render();
-        });
-
-        document.getElementById('btn-zoom-out').addEventListener('click', () => {
-            scale = Math.max(scale / 1.25, 0.2);
-            render();
-        });
-
-        document.getElementById('btn-reset-view').addEventListener('click', () => {
-            scale = 1;
-            offsetX = 0;
-            offsetY = 0;
-            if (graphData) centerGraph();
-            render();
-        });
-
-        document.getElementById('btn-toggle-labels').addEventListener('click', function () {
-            showLabels = !showLabels;
-            this.classList.toggle('active', showLabels);
-            render();
-        });
-
-        document.getElementById('btn-toggle-weights').addEventListener('click', function () {
-            showWeights = !showWeights;
-            this.classList.toggle('active', showWeights);
-            render();
-        });
-    }
-
-
-    // ===================================================================
-    // FUNCIONES AUXILIARES DE COORDENADAS
-    // ===================================================================
-
-    // Convierte coordenadas de pantalla (donde hizo clic el usuario)
-    // a coordenadas del "mundo" del grafo (teniendo en cuenta zoom y desplazamiento)
-    function screenToWorld(sx, sy) {
-        const rect = canvas.getBoundingClientRect();
-        const x = (sx - rect.left - offsetX) / scale;
-        const y = (sy - rect.top - offsetY) / scale;
-        return { x, y };
-    }
-
-    // Busca si hay un nodo en la posición donde hizo clic el usuario
-    function findNodeAt(sx, sy) {
-        const { x, y } = screenToWorld(sx, sy);
-        // Recorrer de atrás para adelante (los últimos se dibujan encima)
-        for (let i = nodes.length - 1; i >= 0; i--) {
-            const n = nodes[i];
-            const dx = x - n.x;
-            const dy = y - n.y;
-            if (dx * dx + dy * dy <= (NODE_RADIUS + 4) * (NODE_RADIUS + 4)) {
-                return n;
-            }
-        }
-        return null;
-    }
-
-    // Centra el grafo en el canvas
-    function centerGraph() {
-        if (nodes.length === 0) return;
-        const cw = canvas.width / devicePixelRatio;
-        const ch = canvas.height / devicePixelRatio;
-
-        // Encontrar los límites del grafo
-        let minX = Infinity, maxX = -Infinity;
-        let minY = Infinity, maxY = -Infinity;
-        nodes.forEach(n => {
-            minX = Math.min(minX, n.x);
-            maxX = Math.max(maxX, n.x);
-            minY = Math.min(minY, n.y);
-            maxY = Math.max(maxY, n.y);
-        });
-
-        // Calcular el centro del grafo y ajustar el desplazamiento
-        const graphCx = (minX + maxX) / 2;
-        const graphCy = (minY + maxY) / 2;
-        offsetX = cw / 2 - graphCx * scale;
-        offsetY = ch / 2 - graphCy * scale;
-    }
-
-
-    // ===================================================================
-    // LAYOUT FORCE-DIRECTED (los nodos se acomodan solos)
-    // ===================================================================
-    // Este algoritmo simula fuerzas físicas:
-    // - Los nodos se REPELEN entre sí (como imanes del mismo polo)
-    // - Las aristas ATRAEN a los nodos que conectan (como resortes)
-    // - Una fuerza de GRAVEDAD empuja todo al centro
-    // El resultado es un layout donde los nodos se distribuyen de forma clara.
-
-    // Coloca los nodos en un círculo inicial y arranca la simulación
+    /**
+     * Función: initLayout
+     * ¿Qué hace?: Cuando cargamos un grafo nuevo, no sabemos dónde poner los nodos 
+     * en la pantalla. Esta función los pone a todos en un círculo perfecto y enciende 
+     * la "gravedad" para que se reacomoden solos mágicamente.
+     */
     function initLayout() {
         const cw = canvas.width / devicePixelRatio;
         const ch = canvas.height / devicePixelRatio;
-        const cx = cw / 2;
-        const cy = ch / 2;
+        const cx = cw / 2; // Centro X
+        const cy = ch / 2; // Centro Y
 
-        // Posicionar nodos en un círculo como punto de partida
+        // Repartimos los nodos en un círculo matemático
         nodes.forEach((n, i) => {
             const angle = (2 * Math.PI * i) / nodes.length;
             const radius = Math.min(cw, ch) * 0.25;
             n.x = cx + radius * Math.cos(angle);
             n.y = cy + radius * Math.sin(angle);
-            n.vx = 0; // Velocidad horizontal
-            n.vy = 0; // Velocidad vertical
-            n.fixed = false;
+            n.vx = 0; // Velocidad X en 0
+            n.vy = 0; // Velocidad Y en 0
+            n.fixed = false; // Sueltos para la simulación
         });
 
-        simulationAlpha = 1;
-        simulationRunning = true;
-        runSimulation();
+        simulationAlpha = 1;      // Calor inicial al máximo
+        simulationRunning = true; // Encendemos el motor
+        runSimulation();          // Iniciamos la animación
     }
 
-    // Ejecuta la simulación cuadro a cuadro
+    /**
+     * Función: runSimulation
+     * ¿Qué hace?: Un ciclo de animación que se llama a sí mismo constantemente
+     * (usando requestAnimationFrame) hasta que la simulación "se enfría".
+     */
     function runSimulation() {
         if (!simulationRunning) return;
 
-        // Hacer 3 pasos de simulación por cuadro (más rápido)
-        for (let iter = 0; iter < 3; iter++) {
+        // Para acelerar la animación, aplicamos las físicas 3 veces por cada fotograma de video
+        const ITERATIONS = 3;
+        for (let iter = 0; iter < ITERATIONS; iter++) {
             simulateStep();
         }
 
-        // Reducir la energía gradualmente hasta que se detenga
+        // Cada fotograma que pasa, el grafo "se enfría" un 3%. 
+        // Cuando llegue casi a 0, detenemos la simulación para no gastar batería de la PC.
         simulationAlpha *= 0.97;
         if (simulationAlpha < 0.005) {
             simulationRunning = false;
         }
 
-        render();
-        animFrame = requestAnimationFrame(runSimulation);
+        render(); // Dibujamos el nuevo fotograma
+        animFrame = requestAnimationFrame(runSimulation); // "Navegador, vuelve a llamarme en el siguiente cuadro"
     }
 
-    // Un paso de la simulación: calcular fuerzas y mover nodos
+    /**
+     * Función: simulateStep
+     * ¿Qué hace?: La magia de las físicas.
+     * 1. Nodos se rechazan entre sí (como imanes del mismo polo).
+     * 2. Las aristas (líneas) actúan como resortes que atraen a los nodos que conectan.
+     * 3. Una gravedad central tira de todos los nodos levemente hacia el medio de la pantalla.
+     */
     function simulateStep() {
-        const repulsion = 5000;      // Fuerza de repulsión entre nodos
-        const attraction = 0.008;    // Fuerza de atracción de las aristas
-        const damping = 0.85;        // Amortiguación (frena los nodos gradualmente)
-        const alpha = simulationAlpha;
+        const repulsion = 5000;
+        const attraction = 0.008;
+        const damping = 0.85; // Fricción, para que no vibren por siempre
+        const alpha = simulationAlpha; // Modificador general que va disminuyendo
 
-        // 1) REPULSIÓN: cada par de nodos se empuja mutuamente
+        // Repulsión: Todos contra todos
         for (let i = 0; i < nodes.length; i++) {
             for (let j = i + 1; j < nodes.length; j++) {
                 let dx = nodes[j].x - nodes[i].x;
                 let dy = nodes[j].y - nodes[i].y;
                 let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                // Entre más cerca estén, más fuerte se repelen
                 let force = (repulsion / (dist * dist)) * alpha;
                 let fx = (dx / dist) * force;
                 let fy = (dy / dist) * force;
+                // Empujamos a ambos en direcciones opuestas usando sus variables de velocidad (v)
                 if (!nodes[i].fixed) { nodes[i].vx -= fx; nodes[i].vy -= fy; }
                 if (!nodes[j].fixed) { nodes[j].vx += fx; nodes[j].vy += fy; }
             }
         }
 
-        // 2) ATRACCIÓN: las aristas jalan a sus nodos conectados
+        // Atracción: Solo entre los nodos que están conectados por una línea
         edges.forEach(e => {
             const source = nodes.find(n => n.id === e.from);
             const target = nodes.find(n => n.id === e.to);
@@ -341,6 +336,7 @@ const Visualizer = (function () {
             let dx = target.x - source.x;
             let dy = target.y - source.y;
             let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            // Entre más estirado esté el "resorte", más fuerte hala para volver a su estado original
             let force = dist * attraction * alpha;
             let fx = (dx / dist) * force;
             let fy = (dy / dist) * force;
@@ -348,7 +344,7 @@ const Visualizer = (function () {
             if (!target.fixed) { target.vx -= fx; target.vy -= fy; }
         });
 
-        // 3) GRAVEDAD: empuja los nodos suavemente hacia el centro
+        // Gravedad al centro
         const cw = canvas.width / devicePixelRatio;
         const ch = canvas.height / devicePixelRatio;
         const gravity = 0.02 * alpha;
@@ -358,38 +354,76 @@ const Visualizer = (function () {
             n.vy += (ch / 2 - n.y) * gravity;
         });
 
-        // 4) MOVER: aplicar velocidad a cada nodo
+        // Finalmente, actualizamos la posición XY de cada nodo sumándole la velocidad calculada
         nodes.forEach(n => {
             if (n.fixed) return;
-            n.vx *= damping;
+            n.vx *= damping; // Aplicar fricción (se pierde el 15% de energía)
             n.vy *= damping;
             n.x += n.vx;
             n.y += n.vy;
         });
     }
 
+    /**
+     * Función: centerGraph
+     * ¿Qué hace?: Calcula qué tan ancho y alto quedó el dibujo de nodos, 
+     * y mueve la cámara para que todo quede perfectamente centrado en pantalla.
+     */
+    function centerGraph() {
+        if (nodes.length === 0) return;
+        const cw = canvas.width / devicePixelRatio;
+        const ch = canvas.height / devicePixelRatio;
+        
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        // Encontramos los bordes extremos del grafo
+        nodes.forEach(n => {
+            minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x);
+            minY = Math.min(minY, n.y); maxY = Math.max(maxY, n.y);
+        });
+        
+        // Calculamos el centro de todos esos bordes
+        const graphCx = (minX + maxX) / 2;
+        const graphCy = (minY + maxY) / 2;
+        
+        // Movemos la cámara global (offset)
+        offsetX = cw / 2 - graphCx * scale;
+        offsetY = ch / 2 - graphCy * scale;
+    }
 
-    // ===================================================================
-    // DIBUJO EN EL CANVAS (render principal)
-    // ===================================================================
+    // ===== DIBUJANDO EN EL CANVAS =====
 
-    // Dibuja todo el grafo: primero aristas, luego nodos
+    /**
+     * Función: render
+     * ¿Qué hace?: Borra la pantalla entera como un pizarrón y vuelve a pintar 
+     * todo desde cero. Esto ocurre decenas de veces por segundo en una animación.
+     */
     function render() {
         const cw = canvas.width / devicePixelRatio;
         const ch = canvas.height / devicePixelRatio;
+        
+        // Limpiamos el pizarrón (clearRect)
         ctx.clearRect(0, 0, cw, ch);
-
+        
+        // Guardamos el estado original del pincel
         ctx.save();
+        
+        // Movemos todo el plano del lienzo según donde esté la cámara (Pan y Zoom)
         ctx.translate(offsetX, offsetY);
         ctx.scale(scale, scale);
 
+        // Primero pintamos las líneas (aristas) para que queden por DEBAJO de los círculos
         drawEdges();
+        // Luego pintamos los círculos (nodos) por ENCIMA de las líneas
         drawNodes();
 
+        // Restauramos el pincel a su estado normal
         ctx.restore();
     }
 
-    // --- Dibujar aristas ---
+    /**
+     * Función: drawEdges
+     * ¿Qué hace?: Dibuja líneas matemáticas entre las coordenadas (X, Y) de los nodos conectados.
+     */
     function drawEdges() {
         const isDirected = graphData && graphData.type === 'directed';
 
@@ -398,40 +432,69 @@ const Visualizer = (function () {
             const target = nodes.find(n => n.id === e.to);
             if (!source || !target) return;
 
+            // Empezamos a trazar un nuevo camino
             ctx.beginPath();
-            ctx.strokeStyle = 'rgba(108, 99, 255, 0.35)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(108, 99, 255, 0.35)'; // Color morado translúcido
+            ctx.lineWidth = 2; // Grosor
 
-            // Caso especial: arista que conecta un nodo consigo mismo (self-loop)
+            // Caso especial: El nodo se conecta consigo mismo
             if (e.from === e.to) {
-                const loopR = 30;
+                const loopR = 30; // Radio del rizo
+                // ctx.arc() dibuja círculos o arcos. Aquí dibujamos un óvalo encima del nodo.
                 ctx.arc(source.x, source.y - loopR, loopR, 0.5 * Math.PI, 2.5 * Math.PI);
-                ctx.stroke();
+                ctx.stroke(); // Dibuja la línea
             } else {
-                ctx.moveTo(source.x, source.y);
-                ctx.lineTo(target.x, target.y);
+                // Caso normal: línea recta entre nodos
+                ctx.moveTo(source.x, source.y); // Pone el lápiz en el origen
+                ctx.lineTo(target.x, target.y); // Traza recta al destino
                 ctx.stroke();
 
-                // Si el grafo es dirigido, dibujar flecha
+                // Si el grafo es dirigido, dibujamos una cabeza de flecha
                 if (isDirected) {
-                    drawArrow(source, target);
+                    drawArrow(source, target); // Llama función interna
                 }
             }
 
-            // Mostrar el peso de la arista (si aplica)
+            // Dibujar la etiqueta numérica (Peso) si está activa
             if (showWeights && graphData && graphData.weighted && e.weight !== undefined) {
-                drawEdgeWeight(source, target, e.weight);
+                // Calculamos el punto intermedio exacto de la línea
+                const mx = (source.x + target.x) / 2;
+                const my = (source.y + target.y) / 2;
+                
+                ctx.save();
+                ctx.fillStyle = '#0a0a0f'; // Color de fondo del letrero
+                const tw = ctx.measureText(String(e.weight)).width; // Medimos cuánto mide el texto
+                // Dibujamos un rectangulito negro para tapar la línea debajo del número
+                ctx.fillRect(mx - tw / 2 - 6, my - 8, tw + 12, 16);
+                
+                ctx.fillStyle = '#FFB347'; // Texto naranja
+                ctx.font = '500 11px "JetBrains Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // Pintamos el texto
+                ctx.fillText(String(e.weight), mx, my);
+                ctx.restore();
             }
         });
     }
 
-    // Dibuja una flecha en la punta de una arista dirigida
+    /**
+     * Función: drawArrow
+     * ¿Qué hace?: Matemática de trigonometría (atan2, cos, sin) para calcular 
+     * el ángulo exacto de la línea y pintar un triángulo en la punta que mire
+     * hacia la dirección correcta.
+     */
     function drawArrow(source, target) {
+        // Obtenemos el ángulo matemático de la línea
         const angle = Math.atan2(target.y - source.y, target.x - source.x);
+        
+        // Hacemos que la punta de la flecha termine exactamente en el borde del círculo del nodo, no en el centro
         const tipX = target.x - NODE_RADIUS * Math.cos(angle);
         const tipY = target.y - NODE_RADIUS * Math.sin(angle);
-        const arrowLen = 12;
+        
+        const arrowLen = 12; // Largo de la flecha
 
+        // Trazamos el triángulo y lo rellenamos
         ctx.beginPath();
         ctx.fillStyle = 'rgba(108, 99, 255, 0.6)';
         ctx.moveTo(tipX, tipY);
@@ -447,113 +510,107 @@ const Visualizer = (function () {
         ctx.fill();
     }
 
-    // Dibuja el número del peso en el punto medio de la arista
-    function drawEdgeWeight(source, target, weight) {
-        const mx = (source.x + target.x) / 2;
-        const my = (source.y + target.y) / 2;
-
-        ctx.save();
-        ctx.font = '500 11px "JetBrains Mono", monospace';
-        const tw = ctx.measureText(String(weight)).width;
-
-        // Fondo oscuro para que el número sea legible
-        ctx.fillStyle = '#0a0a0f';
-        ctx.fillRect(mx - tw / 2 - 6, my - 8, tw + 12, 16);
-
-        // El número del peso
-        ctx.fillStyle = '#FFB347';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(String(weight), mx, my);
-        ctx.restore();
-    }
-
-    // --- Dibujar nodos ---
+    /**
+     * Función: drawNodes
+     * ¿Qué hace?: Recorre cada nodo y dibuja varias capas encima: el brillo,
+     * el círculo sólido, el borde, el punto central y por último su nombre.
+     */
     function drawNodes() {
         nodes.forEach(n => {
-            // Efecto de brillo alrededor del nodo
-            const gradient = ctx.createRadialGradient(
-                n.x, n.y, NODE_RADIUS * 0.5,
-                n.x, n.y, NODE_RADIUS * 2.5
-            );
-            gradient.addColorStop(0, hexToRgba(n.color, 0.15)); // utilidades.js
+            // Función definida en: utilidades.js (hexToRgba)
+            // Capa 1: Brillo exterior difuminado (Radial Gradient)
+            const gradient = ctx.createRadialGradient(n.x, n.y, NODE_RADIUS * 0.5, n.x, n.y, NODE_RADIUS * 2.5);
+            gradient.addColorStop(0, hexToRgba(n.color, 0.15));
             gradient.addColorStop(1, 'transparent');
             ctx.beginPath();
             ctx.fillStyle = gradient;
             ctx.arc(n.x, n.y, NODE_RADIUS * 2.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Círculo del nodo
+            // Capa 2: Círculo principal del nodo
             ctx.beginPath();
             ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2);
-            ctx.fillStyle = hexToRgba(n.color, 0.15); // utilidades.js
+            ctx.fillStyle = hexToRgba(n.color, 0.15); // Fondo transparente
             ctx.fill();
+            
+            // Capa 3: Borde sólido del nodo
             ctx.strokeStyle = n.color;
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
-            // Punto interior del nodo
+            // Capa 4: Punto pequeño sólido en el centro exacto
             ctx.beginPath();
             ctx.arc(n.x, n.y, 4, 0, Math.PI * 2);
             ctx.fillStyle = n.color;
             ctx.fill();
 
-            // Etiqueta del nodo (debajo del círculo)
+            // Capa 5: Nombre del nodo en texto (si el usuario no lo ocultó)
             if (showLabels) {
                 ctx.font = '600 12px "Inter", sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#e8e8f0';
+                ctx.fillStyle = '#e8e8f0'; // Texto claro
+                // Pintamos el texto un poco por debajo de la base del nodo (+16px)
                 ctx.fillText(n.label, n.x, n.y + NODE_RADIUS + 16);
             }
         });
     }
 
+    // ===== API PÚBLICA (LO QUE OTROS ARCHIVOS PUEDEN USAR) =====
 
-    // ===================================================================
-    // FUNCIONES PÚBLICAS (las que otros módulos pueden llamar)
-    // ===================================================================
-
-    // Carga un grafo y lo muestra en el canvas con animación force-directed
+    /**
+     * Función: loadGraph
+     * ¿Qué recibe?: 
+     *  - data (Objeto JSON): Toda la información de un grafo a mostrar.
+     * ¿Qué hace?: Limpia las variables anteriores, copia los datos, inicializa la
+     * física (initLayout) y cambia la interfaz HTML ocultando el cartel de "pantalla vacía".
+     */
     function loadGraph(data) {
-        // Detener cualquier simulación anterior
+        // Detiene cualquier animación de físicas anterior que estuviese corriendo
         if (animFrame) cancelAnimationFrame(animFrame);
         graphData = data;
 
-        // Crear nodos con posiciones iniciales en 0
+        // Construye el arreglo de objetos para la simulación física
         nodes = data.nodes.map((n, i) => ({
             id: n.id,
             label: n.label,
+            // Si el nodo no traía color, le asigna uno usando la paleta base cíclicamente (usando módulo %)
             color: n.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length],
-            x: 0, y: 0, vx: 0, vy: 0, fixed: false
+            x: 0, y: 0, vx: 0, vy: 0, fixed: false // Variables físicas en ceros
         }));
 
-        // Copiar aristas
         edges = data.edges.map(e => ({
             from: e.from,
             to: e.to,
             weight: e.weight
         }));
 
-        // Actualizar la interfaz: ocultar estado vacío, mostrar controles e info
+        // Actualiza etiquetas de información en el panel flotante de la pantalla
         document.getElementById('canvas-empty-state').classList.add('hidden');
         document.getElementById('canvas-controls').classList.remove('hidden');
         document.getElementById('graph-info-panel').classList.remove('hidden');
         document.getElementById('info-graph-name').textContent = data.name;
         document.getElementById('info-nodes').textContent = nodes.length;
         document.getElementById('info-edges').textContent = edges.length;
+        // Operadores ternarios para crear la frase "Dirigido · Ponderado", etc.
         document.getElementById('info-type').textContent =
             (data.type === 'directed' ? 'Dirigido' : 'No dirigido') +
             (data.weighted ? ' · Ponderado' : '');
 
-        // Resetear cámara e iniciar animación
+        // Reiniciamos cámara
         scale = 1;
         offsetX = 0;
         offsetY = 0;
+
+        // Arrancamos simulación
         initLayout();
     }
 
-    // Limpia el canvas y resetea todo
+    /**
+     * Función: clear
+     * ¿Qué hace?: Vacía por completo la pantalla, mata la animación y restablece
+     * el letrero gigante de "Selecciona un grafo".
+     */
     function clear() {
         if (animFrame) cancelAnimationFrame(animFrame);
         nodes = [];
@@ -562,18 +619,28 @@ const Visualizer = (function () {
         const cw = canvas.width / devicePixelRatio;
         const ch = canvas.height / devicePixelRatio;
         ctx.clearRect(0, 0, cw, ch);
+        
         document.getElementById('canvas-empty-state').classList.remove('hidden');
         document.getElementById('canvas-controls').classList.add('hidden');
         document.getElementById('graph-info-panel').classList.add('hidden');
     }
 
-    // Dibuja una mini-preview del grafo en un canvas pequeño (para el editor)
-    // Es una versión simplificada: sin zoom, sin arrastre, sin animación
+    /**
+     * Función: renderPreview
+     * ¿Qué recibe?: 
+     *  - canvasEl (Elemento HTML): El recuadro pequeño donde dibujar.
+     *  - data (Objeto grafo): Los datos a visualizar.
+     * ¿Qué hace?: Es una versión "mini" del visualizador. Dibuja un pantallazo 
+     * estático y rápido de un grafo en un pequeño recuadro para usarlo dentro del Editor.
+     * No tiene físicas ni animaciones, solo distribuye en círculo y pinta.
+     * ¿Por qué existe?: Para reciclar código de dibujo en el área del editor.
+     */
     function renderPreview(canvasEl, data) {
+        // Pedimos contexto al canvas de destino
         const pCtx = canvasEl.getContext('2d');
         const parent = canvasEl.parentElement;
-
-        // Ajustar tamaño del canvas al contenedor
+        
+        // Ajustamos la escala
         canvasEl.width = parent.clientWidth * devicePixelRatio;
         canvasEl.height = parent.clientHeight * devicePixelRatio;
         canvasEl.style.width = parent.clientWidth + 'px';
@@ -582,16 +649,18 @@ const Visualizer = (function () {
 
         const w = parent.clientWidth;
         const h = parent.clientHeight;
-        pCtx.clearRect(0, 0, w, h);
+        pCtx.clearRect(0, 0, w, h); // Limpiamos cuadro
 
+        // Si no mandaron datos, abortamos.
         if (!data || !data.nodes || data.nodes.length === 0) return;
 
-        // Posicionar nodos en un círculo (layout estático simple)
+        // Posicionamos matemáticamente en un círculo fijo
         const pNodes = data.nodes.map((n, i) => {
             const angle = (2 * Math.PI * i) / data.nodes.length;
-            const r = Math.min(w, h) * 0.3;
+            const r = Math.min(w, h) * 0.3; // Radio del círculo
             return {
-                ...n,
+                ...n, // Copia todas las propiedades originales
+                // Genera coordenadas fijas calculadas con trigonometría básica
                 x: w / 2 + r * Math.cos(angle - Math.PI / 2),
                 y: h / 2 + r * Math.sin(angle - Math.PI / 2),
                 color: n.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
@@ -599,13 +668,14 @@ const Visualizer = (function () {
         });
 
         const isDirected = data.type === 'directed';
-        const nr = 12; // Radio de nodo en la preview (más pequeño)
+        const nr = 12; // Radio más pequeño (porque es una previsualización mini)
 
-        // Dibujar aristas de la preview
+        // Pintamos aristas (Mini versión de drawEdges)
         (data.edges || []).forEach(e => {
             const s = pNodes.find(n => n.id === e.from);
             const t = pNodes.find(n => n.id === e.to);
             if (!s || !t) return;
+            
             pCtx.beginPath();
             pCtx.strokeStyle = 'rgba(108,99,255,0.35)';
             pCtx.lineWidth = 1.5;
@@ -613,7 +683,7 @@ const Visualizer = (function () {
             pCtx.lineTo(t.x, t.y);
             pCtx.stroke();
 
-            // Flecha para grafos dirigidos
+            // Flechitas miniaturas
             if (isDirected && e.from !== e.to) {
                 const angle = Math.atan2(t.y - s.y, t.x - s.x);
                 const tipX = t.x - nr * Math.cos(angle);
@@ -628,23 +698,21 @@ const Visualizer = (function () {
             }
         });
 
-        // Dibujar nodos de la preview
+        // Pintamos nodos (Mini versión de drawNodes)
         pNodes.forEach(n => {
             pCtx.beginPath();
             pCtx.arc(n.x, n.y, nr, 0, Math.PI * 2);
-            pCtx.fillStyle = hexToRgba(n.color, 0.18); // utilidades.js
+            pCtx.fillStyle = hexToRgba(n.color, 0.18); // Función definida en: utilidades.js
             pCtx.fill();
             pCtx.strokeStyle = n.color;
             pCtx.lineWidth = 2;
             pCtx.stroke();
 
-            // Punto interior
             pCtx.beginPath();
             pCtx.arc(n.x, n.y, 3, 0, Math.PI * 2);
             pCtx.fillStyle = n.color;
             pCtx.fill();
 
-            // Etiqueta
             pCtx.font = '600 10px "Inter", sans-serif';
             pCtx.textAlign = 'center';
             pCtx.fillStyle = '#e8e8f0';
@@ -652,8 +720,6 @@ const Visualizer = (function () {
         });
     }
 
-
-    // Lo que otros archivos pueden usar de este módulo
+    // Retorna (hace públicos) los métodos que se necesitan invocar desde app.js o editor.js
     return { init, loadGraph, clear, renderPreview };
-
 })();
