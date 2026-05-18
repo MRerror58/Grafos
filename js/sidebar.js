@@ -41,7 +41,7 @@ const Sidebar = (() => {
      */
     function render() {
         const container = document.getElementById('sidebar-container');
-        
+
         // Usamos template strings (`...`) para poder escribir en múltiples líneas
         // e insertar variables dinámicamente usando ${}.
         container.innerHTML = `
@@ -140,8 +140,8 @@ const Sidebar = (() => {
     function toggleCollapse() {
         const sidebar = document.getElementById('sidebar');
         // El operador ! invierte el booleano: si es true pasa a false, y viceversa
-        collapsed = !collapsed; 
-        
+        collapsed = !collapsed;
+
         // El método 'toggle' en classList añade la clase si el segundo parámetro es true, o la quita si es false.
         sidebar.classList.toggle('collapsed', collapsed);
     }

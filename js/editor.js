@@ -52,14 +52,14 @@ const Editor = (() => {
 
         // Evento 'change' se activa cuando un menú desplegable (select) cambia su valor.
         // Aquí mostramos u ocultamos la caja para escribir el "peso" según la selección.
-        document.getElementById('graph-weighted').addEventListener('change', function() {
+        document.getElementById('graph-weighted').addEventListener('change', function () {
             currentGraph.weighted = this.value === 'yes';
             // Modificamos CSS directamente usando JS (.style.display)
             document.getElementById('weight-group').style.display = this.value === 'yes' ? 'flex' : 'none';
         });
 
         // Evento cuando se cambia el tipo de grafo (dirigido/no dirigido)
-        document.getElementById('graph-type').addEventListener('change', function() {
+        document.getElementById('graph-type').addEventListener('change', function () {
             currentGraph.type = this.value;
             updatePreview(); // Volvemos a dibujar la previsualización porque las líneas cambian
         });
@@ -87,7 +87,7 @@ const Editor = (() => {
     function addNode() {
         const labelInput = document.getElementById('node-label');
         const colorInput = document.getElementById('node-color');
-        
+
         // .trim() limpia los espacios en blanco accidentales que el usuario haya puesto al principio o final
         const label = labelInput.value.trim();
 
@@ -108,7 +108,7 @@ const Editor = (() => {
         // Se crea el "Objeto Nodo" que viajará por todo el código
         const node = {
             // ++nodeIdCounter incrementa la variable primero y luego asigna el valor. Resultado: n1, n2, n3...
-            id: 'n' + (++nodeIdCounter), 
+            id: 'n' + (++nodeIdCounter),
             label: label,
             color: colorInput.value
         };
@@ -122,7 +122,7 @@ const Editor = (() => {
         updateNodesList();
         updateSummary();
         updatePreview();
-        
+
         showToast(`Nodo "${label}" agregado`, 'success'); // Función definida en: app.js
         labelInput.focus();
     }
@@ -138,11 +138,11 @@ const Editor = (() => {
         // filter() crea un nuevo arreglo que SOLO contiene los elementos que cumplen la condición.
         // Condición: "Quédate con todos los nodos cuyo id NO sea igual al id que me mandaron borrar".
         currentGraph.nodes = currentGraph.nodes.filter(n => n.id !== id);
-        
+
         // Hacemos lo mismo con las aristas: eliminamos aquellas donde el origen (from) 
         // o el destino (to) coincidan con el nodo borrado.
         currentGraph.edges = currentGraph.edges.filter(e => e.from !== id && e.to !== id);
-        
+
         // Refrescamos la vista
         updateNodeSelectors();
         updateNodesList();
@@ -192,7 +192,7 @@ const Editor = (() => {
 
         // Creamos la nueva conexión
         const edge = { from, to };
-        
+
         // Si el grafo soporta "pesos" (distancias, costos), lo guardamos también
         if (currentGraph.weighted) {
             // parseFloat convierte un texto (ej: "4.5") en número. Si el usuario escribió letras,
@@ -201,7 +201,7 @@ const Editor = (() => {
         }
 
         currentGraph.edges.push(edge);
-        
+
         updateEdgesList();
         updateSummary();
         updatePreview();
@@ -223,7 +223,7 @@ const Editor = (() => {
         // splice() modifica el arreglo original eliminando elementos. 
         // Parámetros: splice(desde_dónde, cuántos_elementos)
         currentGraph.edges.splice(index, 1);
-        
+
         updateEdgesList();
         updateSummary();
         updatePreview();
@@ -276,7 +276,7 @@ const Editor = (() => {
                 modal.classList.add('hidden');
                 cleanup();
                 // Llama a performSave indicándole específicamente cuál ID debe sobreescribir
-                performSave(name, existingGraph.id); 
+                performSave(name, existingGraph.id);
             };
 
             // Es crítico limpiar los eventos usando removeEventListener. 
@@ -308,7 +308,7 @@ const Editor = (() => {
     function performSave(name, overrideId = null) {
         // Date.now() nos da la cantidad de milisegundos desde 1970. Es un truco común para generar un ID único.
         const graphId = overrideId || ('g_' + Date.now());
-        
+
         // Creamos el paquete final que va a la base de datos
         const graphToSave = {
             id: graphId,
@@ -323,7 +323,7 @@ const Editor = (() => {
         };
 
         let saved = getSavedGraphs();
-        
+
         if (overrideId) {
             // Buscamos en qué posición (índice 0, 1, 2) está el grafo viejo
             const idx = saved.findIndex(g => g.id === overrideId);
@@ -335,7 +335,7 @@ const Editor = (() => {
         } else {
             saved.push(graphToSave); // Es nuevo, lo ponemos al final de la fila
         }
-        
+
         // localStorage solo sabe guardar textos simples, no arreglos ni objetos complejos.
         // JSON.stringify() traduce todo el arreglo de objetos a un largo texto (String) comprensible para las máquinas.
         localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
@@ -372,7 +372,7 @@ const Editor = (() => {
         let saved = getSavedGraphs();
         saved = saved.filter(g => g.id !== id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-        
+
         loadSavedGraphsList();
         refreshVisualizerSelector();
         showToast('Grafo eliminado', 'info'); // Función definida en: app.js
@@ -420,7 +420,7 @@ const Editor = (() => {
         updateEdgesList();
         updateSummary();
         updatePreview();
-        
+
         showToast(`Grafo "${graph.name}" cargado en el editor`, 'info'); // Función definida en: app.js
     }
 
@@ -431,13 +431,13 @@ const Editor = (() => {
     function clearForm() {
         currentGraph = { name: '', type: 'undirected', weighted: false, nodes: [], edges: [] };
         nodeIdCounter = 0;
-        
+
         document.getElementById('graph-name').value = '';
         document.getElementById('graph-type').value = 'undirected';
         document.getElementById('graph-weighted').value = 'no';
         document.getElementById('weight-group').style.display = 'none';
         document.getElementById('node-label').value = '';
-        
+
         updateNodeSelectors();
         updateNodesList();
         updateEdgesList();
@@ -458,7 +458,7 @@ const Editor = (() => {
         const options = currentGraph.nodes.map(n =>
             `<option value="${n.id}">${n.label}</option>`
         ).join(''); // .join('') concatena (une) todas las cadenas en un solo texto gigante.
-        
+
         const placeholder = '<option value="">—</option>';
         // .innerHTML toma el HTML y lo inserta en la página en vivo
         document.getElementById('edge-from').innerHTML = placeholder + options;
@@ -475,7 +475,7 @@ const Editor = (() => {
             container.innerHTML = '<span class="empty-chip">Sin nodos</span>';
             return;
         }
-        
+
         // El parámetro 'n' representa a cada nodo individual durante el ciclo map()
         container.innerHTML = currentGraph.nodes.map(n => `
             <span class="chip">
@@ -499,7 +499,7 @@ const Editor = (() => {
             container.innerHTML = '<span class="empty-chip">Sin aristas</span>';
             return;
         }
-        
+
         // Aquí pasamos dos parámetros al map(elemento, índice)
         // La 'e' es la arista actual. La 'i' es la posición (0, 1, 2) fundamental para poder borrarla.
         container.innerHTML = currentGraph.edges.map((e, i) => {
@@ -508,7 +508,7 @@ const Editor = (() => {
             // Operador ternario (condición ? verdadero : falso)
             const arrow = currentGraph.type === 'directed' ? '→' : '↔';
             const weightStr = currentGraph.weighted && e.weight !== undefined ? ` (${e.weight})` : '';
-            
+
             return `
                 <span class="chip">
                     ${fromLabel} ${arrow} ${toLabel}${weightStr}
@@ -570,7 +570,7 @@ const Editor = (() => {
             // Conversión de formato de fecha. Se toma la estampa ISO y se pasa a algo amigable localmente.
             const date = new Date(g.createdAt);
             const dateStr = date.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
-            
+
             return `
                 <div class="saved-graph-card">
                     <div class="saved-graph-info">
@@ -607,9 +607,9 @@ const Editor = (() => {
         const saved = getSavedGraphs();
         const graph = saved.find(g => g.id === id);
         if (!graph) return;
-        
+
         Sidebar.navigateTo('visualizer'); // Función definida en: sidebar.js
-        
+
         // Retrasamos el dibujo 100 milisegundos usando setTimeout, para que el CSS y la pantalla
         // terminen de hacer la transición antes de pedirle a la PC cálculos gráficos pesados.
         setTimeout(() => {
@@ -626,7 +626,7 @@ const Editor = (() => {
     function refreshVisualizerSelector() {
         const selector = document.getElementById('graph-selector');
         const saved = getSavedGraphs();
-        
+
         selector.innerHTML = '<option value="">— Seleccionar grafo —</option>' +
             saved.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
     }

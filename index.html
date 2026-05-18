@@ -3,12 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <meta name="description" content="GraphLab — Graficadora de Grafos interactiva. Visualiza y gestiona grafos con layout force-directed.">
     <title>GraphLab — Graficadora de Grafos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+=======
+    <meta name="description" content="GraficatorG — Graficadora de Grafos interactiva. Visualiza y gestiona grafos con layout force-directed.">
+    <title>GraficatorG — Graficadora de Grafos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/visualizador.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/componentes.css">
+>>>>>>> 1a3801149b7109a8ba30c8a48726c91a222aa6e4
 </head>
 <body>
     <!-- Sidebar (rendered by js/sidebar.js) -->
@@ -20,10 +32,13 @@
         <!-- ==================== PAGE: VISUALIZADOR ==================== -->
         <section id="page-visualizer" class="page active">
             <div class="page-header">
+<<<<<<< HEAD
                 <div class="page-title-group">
                     <h1>Visualizador de Grafos</h1>
                     <p class="page-subtitle">Selecciona un grafo guardado para visualizarlo interactivamente</p>
                 </div>
+=======
+>>>>>>> 1a3801149b7109a8ba30c8a48726c91a222aa6e4
                 <div class="page-actions">
                     <select id="graph-selector" class="select-control">
                         <option value="">— Seleccionar grafo —</option>
@@ -309,9 +324,17 @@
     <!-- Toast notifications -->
     <div id="toast-container"></div>
 
+<<<<<<< HEAD
     <!-- Scripts -->
     <script src="js/sidebar.js"></script>
     <script src="js/visualizer.js"></script>
+=======
+    <!-- Scripts (orden importante: utilidades primero, app al final) -->
+    <script src="js/utilidades.js"></script>
+    <script src="js/almacenamiento.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/dibujarGrafo.js"></script>
+>>>>>>> 1a3801149b7109a8ba30c8a48726c91a222aa6e4
     <script src="js/editor.js"></script>
     <script src="js/app.js"></script>
 </body>
