@@ -118,3 +118,100 @@ Para entender el proyecto GraphLab (y cualquier otra app web), debes ver cómo t
    - Cuando el usuario hace clic en "Agregar Nodo", se dispara una función en JS.
    - Esa función toma los datos, los valida, y los guarda en un arreglo en la memoria.
    - Finalmente, la misma función actualiza el HTML o le dice al `canvas` que dibuje una pelotita nueva en pantalla, dando la sensación de interactividad instantánea.
+
+
+**NOTAS (JUAN DAVID VASQUEZ CAÑAS)**
+
+# Funciones Nativas de JavaScript (No definidas en nuestro código)
+
+A continuación se explican las funciones que utiliza nuestro proyecto que ya existen por defecto en JavaScript (incorporadas en el navegador o en la API de Canvas) y que no se definen dentro de nuestros archivos, detallando qué hacen, qué devuelven y un ejemplo.
+
+- **`getBoundingClientRect()`**
+  - **Qué hace:** Obtiene la posición física y el tamaño de un elemento HTML (como nuestro `<canvas>`) respecto al área visible del navegador.
+  - **Qué devuelve:** Un objeto de tipo `DOMRect` con propiedades numéricas de lectura de los bordes (`top`, `bottom`, `left`, `right`, `width`, `height`, `x`, `y`).
+  - **Ejemplo de retorno:** `{ x: 250, y: 80, width: 800, height: 600, top: 80, right: 1050, bottom: 680, left: 250 }`
+
+- **`getContext('2d')`**
+  - **Qué hace:** Le pide a un elemento `<canvas>` que inicialice y retorne su "lienzo" de dibujo en dos dimensiones (el pincel 2D).
+  - **Qué devuelve:** El objeto de contexto 2D (`CanvasRenderingContext2D`) que contiene todas las funciones y propiedades para trazar dibujos sobre el lienzo.
+  - **Ejemplo de retorno:** `CanvasRenderingContext2D { canvas: canvasElement, globalAlpha: 1, strokeStyle: '#000000', ... }`
+
+- **`setTransform(a, b, c, d, e, f)`**
+  - **Qué hace:** Restablece y aplica una matriz de transformación matemática para definir la escala, rotación o traslación directa en el Canvas. Nosotros la usamos para ajustar los gráficos a la resolución de pantallas Retina.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`save()`**
+  - **Qué hace:** Guarda una "copia de seguridad" del estado actual del lápiz o pincel en el Canvas (colores, sombras, escala, translación).
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`restore()`**
+  - **Qué hace:** Revierte el estado del pincel al último estado que guardaste con `save()`. Evita que configuraciones previas afecten a los siguientes dibujos.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`translate(x, y)`**
+  - **Qué hace:** Mueve el origen de coordenadas imaginario `(0, 0)` del Canvas a una nueva posición. Se usa para desplazar la cámara global (efecto de arrastrar el fondo).
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`scale(x, y)`**
+  - **Qué hace:** Aplica una transformación de zoom multiplicando todas las coordenadas futuras del dibujo por los factores dados.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`clearRect(x, y, ancho, alto)`**
+  - **Qué hace:** Borra por completo como un borrador de pizarra una zona rectangular del Canvas, volviendo los píxeles transparentes.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`beginPath()`**
+  - **Qué hace:** Inicia o vacía la lista de trazos activos del lápiz en el Canvas, para indicarle al pincel que lo que se dibuje a continuación es una figura nueva y separada.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`moveTo(x, y)`**
+  - **Qué hace:** Levanta el lápiz virtual y lo posiciona en las coordenadas `(x, y)` indicadas sin trazar ninguna línea intermedia.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`lineTo(x, y)`**
+  - **Qué hace:** Apoya el lápiz virtual en el Canvas y define una línea recta desde la posición actual hasta las coordenadas `(x, y)`.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`stroke()`**
+  - **Qué hace:** Dibuja físicamente el contorno de las líneas del trazo que se han definido con comandos previos (como `moveTo` y `lineTo`) usando el color de lápiz activo.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`fill()`**
+  - **Qué hace:** Rellena el interior de la figura o camino geométrico trazado actualmente con el color sólido o gradiente seleccionado.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`arc(x, y, radio, anguloInicio, anguloFin)`**
+  - **Qué hace:** Define un arco circular o un círculo completo centrado en las coordenadas `(x, y)` con el radio y ángulos provistos.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`measureText(texto)`**
+  - **Qué hace:** Calcula las dimensiones de ancho y alto que ocupará un texto específico antes de pintarlo físicamente, basándose en la tipografía configurada.
+  - **Qué devuelve:** Un objeto `TextMetrics` con las propiedades físicas medibles.
+  - **Ejemplo de retorno:** `TextMetrics { width: 42.68, actualBoundingBoxAscent: 9, ... }`
+
+- **`preventDefault()`**
+  - **Qué hace:** Cancela el comportamiento que el navegador ejecuta por defecto ante ciertos eventos (como detener el scroll vertical de la ventana web cuando el usuario gira la rueda dentro del Canvas).
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`
+
+- **`requestAnimationFrame(funcionCallback)`**
+  - **Qué hace:** Le solicita al navegador que programe y ejecute una función específica en el próximo refresco de pantalla para realizar animaciones fluidas a 60fps.
+  - **Qué devuelve:** Un número entero (`ID`) que representa el identificador de la petición, útil para cancelarla si es necesario.
+  - **Ejemplo de retorno:** `125`
+
+- **`cancelAnimationFrame(idAnimacion)`**
+  - **Qué hace:** Cancela una solicitud de animación en cola que se haya registrado previamente con `requestAnimationFrame`.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`

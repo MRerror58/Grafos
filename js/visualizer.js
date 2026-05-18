@@ -48,7 +48,7 @@ const Visualizer = (() => {
      */
     function init() {
         canvas = document.getElementById('graph-canvas');
-        ctx = canvas.getContext('2d'); // Pedimos un contexto 2D para poder dibujar formas
+        ctx = canvas.getContext('2d'); // guia-js.md | // Pedimos un contexto 2D para poder dibujar formas
         
         resizeCanvas();
         // Si el usuario cambia el tamaño de la ventana del navegador, reajustamos el canvas
@@ -72,7 +72,7 @@ const Visualizer = (() => {
         canvas.style.height = parent.clientHeight + 'px';
         
         // Ajustamos la escala base del dibujo
-        ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); // guia-js.md
         
         // Si ya hay un grafo cargado, lo repintamos
         if (graphData) render();
@@ -131,7 +131,7 @@ const Visualizer = (() => {
      * ¿Qué devuelve?: Objeto { x, y } con las coordenadas reales.
      */
     function screenToWorld(sx, sy) {
-        const rect = canvas.getBoundingClientRect(); // Posición del canvas en el HTML
+        const rect = canvas.getBoundingClientRect(); // guia-js.md | // Posición del canvas en el HTML
         // Deshacemos matemáticamente el desplazamiento y luego la escala
         const x = (sx - rect.left - offsetX) / scale;
         const y = (sy - rect.top - offsetY) / scale;
@@ -209,13 +209,13 @@ const Visualizer = (() => {
     }
 
     function onWheel(e) {
-        // e.preventDefault() evita que la página web entera haga scroll hacia abajo
-        e.preventDefault();
+        // guia-js.md | // e.preventDefault() evita que la página web entera haga scroll hacia abajo
+        e.preventDefault(); // guia-js.md
         
         // Si la rueda gira hacia adelante, acerca el zoom. Si no, lo aleja.
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         
-        const rect = canvas.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect(); // guia-js.md
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
         
@@ -290,7 +290,7 @@ const Visualizer = (() => {
         }
 
         render(); // Dibujamos el nuevo fotograma
-        animFrame = requestAnimationFrame(runSimulation); // "Navegador, vuelve a llamarme en el siguiente cuadro"
+        animFrame = requestAnimationFrame(runSimulation); // guia-js.md | // "Navegador, vuelve a llamarme en el siguiente cuadro"
     }
 
     /**
@@ -396,14 +396,14 @@ const Visualizer = (() => {
         const ch = canvas.height / devicePixelRatio;
         
         // Limpiamos el pizarrón (clearRect)
-        ctx.clearRect(0, 0, cw, ch);
+        ctx.clearRect(0, 0, cw, ch); // guia-js.md
         
         // Guardamos el estado original del pincel
-        ctx.save();
+        ctx.save(); // guia-js.md
         
         // Movemos todo el plano del lienzo según donde esté la cámara (Pan y Zoom)
-        ctx.translate(offsetX, offsetY);
-        ctx.scale(scale, scale);
+        ctx.translate(offsetX, offsetY); // guia-js.md
+        ctx.scale(scale, scale); // guia-js.md
 
         // Primero pintamos las líneas (aristas) para que queden por DEBAJO de los círculos
         drawEdges();
@@ -411,7 +411,7 @@ const Visualizer = (() => {
         drawNodes();
 
         // Restauramos el pincel a su estado normal
-        ctx.restore();
+        ctx.restore(); // guia-js.md
     }
 
     /**
@@ -427,21 +427,21 @@ const Visualizer = (() => {
             if (!source || !target) return;
 
             // Empezamos a trazar un nuevo camino
-            ctx.beginPath();
+            ctx.beginPath(); // guia-js.md
             ctx.strokeStyle = 'rgba(108, 99, 255, 0.35)'; // Color morado translúcido
             ctx.lineWidth = 2; // Grosor
 
             // Caso especial: El nodo se conecta consigo mismo
             if (e.from === e.to) {
                 const loopR = 30; // Radio del rizo
-                // ctx.arc() dibuja círculos o arcos. Aquí dibujamos un óvalo encima del nodo.
-                ctx.arc(source.x, source.y - loopR, loopR, 0.5 * Math.PI, 2.5 * Math.PI);
-                ctx.stroke(); // Dibuja la línea
+                // guia-js.md | // ctx.arc() dibuja círculos o arcos. Aquí dibujamos un óvalo encima del nodo.
+                ctx.arc(source.x, source.y - loopR, loopR, 0.5 * Math.PI, 2.5 * Math.PI); // guia-js.md
+                ctx.stroke(); // guia-js.md | // Dibuja la línea
             } else {
                 // Caso normal: línea recta entre nodos
-                ctx.moveTo(source.x, source.y); // Pone el lápiz en el origen
-                ctx.lineTo(target.x, target.y); // Traza recta al destino
-                ctx.stroke();
+                ctx.moveTo(source.x, source.y); // guia-js.md | // Pone el lápiz en el origen
+                ctx.lineTo(target.x, target.y); // guia-js.md | // Traza recta al destino
+                ctx.stroke(); // guia-js.md
 
                 // Si el grafo es dirigido, dibujamos una cabeza de flecha
                 if (isDirected) {
@@ -455,9 +455,9 @@ const Visualizer = (() => {
                 const mx = (source.x + target.x) / 2;
                 const my = (source.y + target.y) / 2;
                 
-                ctx.save();
+                ctx.save(); // guia-js.md
                 ctx.fillStyle = '#0a0a0f'; // Color de fondo del letrero
-                const tw = ctx.measureText(String(e.weight)).width; // Medimos cuánto mide el texto
+                const tw = ctx.measureText(String(e.weight)).width; // guia-js.md | // Medimos cuánto mide el texto
                 // Dibujamos un rectangulito negro para tapar la línea debajo del número
                 ctx.fillRect(mx - tw / 2 - 6, my - 8, tw + 12, 16);
                 
@@ -467,7 +467,7 @@ const Visualizer = (() => {
                 ctx.textBaseline = 'middle';
                 // Pintamos el texto
                 ctx.fillText(String(e.weight), mx, my);
-                ctx.restore();
+                ctx.restore(); // guia-js.md
             }
         });
     }
@@ -489,19 +489,19 @@ const Visualizer = (() => {
         const arrowLen = 12; // Largo de la flecha
 
         // Trazamos el triángulo y lo rellenamos
-        ctx.beginPath();
+        ctx.beginPath(); // guia-js.md
         ctx.fillStyle = 'rgba(108, 99, 255, 0.6)';
-        ctx.moveTo(tipX, tipY);
-        ctx.lineTo(
+        ctx.moveTo(tipX, tipY); // guia-js.md
+        ctx.lineTo( // guia-js.md
             tipX - arrowLen * Math.cos(angle - Math.PI / 7),
             tipY - arrowLen * Math.sin(angle - Math.PI / 7)
         );
-        ctx.lineTo(
+        ctx.lineTo( // guia-js.md
             tipX - arrowLen * Math.cos(angle + Math.PI / 7),
             tipY - arrowLen * Math.sin(angle + Math.PI / 7)
         );
         ctx.closePath();
-        ctx.fill();
+        ctx.fill(); // guia-js.md
     }
 
     /**
@@ -515,27 +515,27 @@ const Visualizer = (() => {
             const gradient = ctx.createRadialGradient(n.x, n.y, NODE_RADIUS * 0.5, n.x, n.y, NODE_RADIUS * 2.5);
             gradient.addColorStop(0, hexToRgba(n.color, 0.15));
             gradient.addColorStop(1, 'transparent');
-            ctx.beginPath();
+            ctx.beginPath(); // guia-js.md
             ctx.fillStyle = gradient;
-            ctx.arc(n.x, n.y, NODE_RADIUS * 2.5, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.arc(n.x, n.y, NODE_RADIUS * 2.5, 0, Math.PI * 2); // guia-js.md
+            ctx.fill(); // guia-js.md
 
             // Capa 2: Círculo principal del nodo
-            ctx.beginPath();
-            ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2);
+            ctx.beginPath(); // guia-js.md
+            ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2); // guia-js.md
             ctx.fillStyle = hexToRgba(n.color, 0.15); // Fondo transparente
-            ctx.fill();
+            ctx.fill(); // guia-js.md
             
             // Capa 3: Borde sólido del nodo
             ctx.strokeStyle = n.color;
             ctx.lineWidth = 2.5;
-            ctx.stroke();
+            ctx.stroke(); // guia-js.md
 
             // Capa 4: Punto pequeño sólido en el centro exacto
-            ctx.beginPath();
-            ctx.arc(n.x, n.y, 4, 0, Math.PI * 2);
+            ctx.beginPath(); // guia-js.md
+            ctx.arc(n.x, n.y, 4, 0, Math.PI * 2); // guia-js.md
             ctx.fillStyle = n.color;
-            ctx.fill();
+            ctx.fill(); // guia-js.md
 
             // Capa 5: Nombre del nodo en texto (si el usuario no lo ocultó)
             if (showLabels) {
@@ -572,7 +572,7 @@ const Visualizer = (() => {
      */
     function loadGraph(data) {
         // Detiene cualquier animación de físicas anterior que estuviese corriendo
-        if (animFrame) cancelAnimationFrame(animFrame);
+        if (animFrame) cancelAnimationFrame(animFrame); // guia-js.md
         graphData = data;
 
         // Construye el arreglo de objetos para la simulación física
@@ -617,13 +617,13 @@ const Visualizer = (() => {
      * el letrero gigante de "Selecciona un grafo".
      */
     function clear() {
-        if (animFrame) cancelAnimationFrame(animFrame);
+        if (animFrame) cancelAnimationFrame(animFrame); // guia-js.md
         nodes = [];
         edges = [];
         graphData = null;
         const cw = canvas.width / devicePixelRatio;
         const ch = canvas.height / devicePixelRatio;
-        ctx.clearRect(0, 0, cw, ch);
+        ctx.clearRect(0, 0, cw, ch); // guia-js.md
         
         document.getElementById('canvas-empty-state').classList.remove('hidden');
         document.getElementById('canvas-controls').classList.add('hidden');
@@ -640,7 +640,7 @@ const Visualizer = (() => {
      */
     function renderPreview(canvasEl, data) {
         // Pedimos contexto al canvas de destino
-        const pCtx = canvasEl.getContext('2d');
+        const pCtx = canvasEl.getContext('2d'); // guia-js.md
         const parent = canvasEl.parentElement;
         
         // Ajustamos la escala
@@ -648,11 +648,11 @@ const Visualizer = (() => {
         canvasEl.height = parent.clientHeight * devicePixelRatio;
         canvasEl.style.width = parent.clientWidth + 'px';
         canvasEl.style.height = parent.clientHeight + 'px';
-        pCtx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        pCtx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); // guia-js.md
 
         const w = parent.clientWidth;
         const h = parent.clientHeight;
-        pCtx.clearRect(0, 0, w, h); // Limpiamos cuadro
+        pCtx.clearRect(0, 0, w, h); // guia-js.md | // Limpiamos cuadro
 
         // Si no mandaron datos, abortamos.
         if (!data || !data.nodes || data.nodes.length === 0) return;
@@ -679,42 +679,42 @@ const Visualizer = (() => {
             const t = pNodes.find(n => n.id === e.to);
             if (!s || !t) return;
             
-            pCtx.beginPath();
+            pCtx.beginPath(); // guia-js.md
             pCtx.strokeStyle = 'rgba(108,99,255,0.35)';
             pCtx.lineWidth = 1.5;
-            pCtx.moveTo(s.x, s.y);
-            pCtx.lineTo(t.x, t.y);
-            pCtx.stroke();
+            pCtx.moveTo(s.x, s.y); // guia-js.md
+            pCtx.lineTo(t.x, t.y); // guia-js.md
+            pCtx.stroke(); // guia-js.md
 
             // Flechitas miniaturas
             if (isDirected && e.from !== e.to) {
                 const angle = Math.atan2(t.y - s.y, t.x - s.x);
                 const tipX = t.x - nr * Math.cos(angle);
                 const tipY = t.y - nr * Math.sin(angle);
-                pCtx.beginPath();
+                pCtx.beginPath(); // guia-js.md
                 pCtx.fillStyle = 'rgba(108,99,255,0.6)';
-                pCtx.moveTo(tipX, tipY);
-                pCtx.lineTo(tipX - 8 * Math.cos(angle - 0.4), tipY - 8 * Math.sin(angle - 0.4));
-                pCtx.lineTo(tipX - 8 * Math.cos(angle + 0.4), tipY - 8 * Math.sin(angle + 0.4));
+                pCtx.moveTo(tipX, tipY); // guia-js.md
+                pCtx.lineTo(tipX - 8 * Math.cos(angle - 0.4), tipY - 8 * Math.sin(angle - 0.4)); // guia-js.md
+                pCtx.lineTo(tipX - 8 * Math.cos(angle + 0.4), tipY - 8 * Math.sin(angle + 0.4)); // guia-js.md
                 pCtx.closePath();
-                pCtx.fill();
+                pCtx.fill(); // guia-js.md
             }
         });
 
         // Pintamos nodos (Mini versión de drawNodes)
         pNodes.forEach(n => {
-            pCtx.beginPath();
-            pCtx.arc(n.x, n.y, nr, 0, Math.PI * 2);
+            pCtx.beginPath(); // guia-js.md
+            pCtx.arc(n.x, n.y, nr, 0, Math.PI * 2); // guia-js.md
             pCtx.fillStyle = hexToRgba(n.color, 0.18);
-            pCtx.fill();
+            pCtx.fill(); // guia-js.md
             pCtx.strokeStyle = n.color;
             pCtx.lineWidth = 2;
-            pCtx.stroke();
+            pCtx.stroke(); // guia-js.md
 
-            pCtx.beginPath();
-            pCtx.arc(n.x, n.y, 3, 0, Math.PI * 2);
+            pCtx.beginPath(); // guia-js.md
+            pCtx.arc(n.x, n.y, 3, 0, Math.PI * 2); // guia-js.md
             pCtx.fillStyle = n.color;
-            pCtx.fill();
+            pCtx.fill(); // guia-js.md
 
             pCtx.font = '600 10px "Inter", sans-serif';
             pCtx.textAlign = 'center';

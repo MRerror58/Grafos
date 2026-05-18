@@ -70,8 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 canvas.style.height = parent.clientHeight + 'px';
 
                 // Le indica al "pincel" del canvas (contexto) que trabaje con la nueva escala de píxeles
-                const ctx = canvas.getContext('2d');
-                ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+                const ctx = canvas.getContext('2d'); // guia-js.md
+                ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); // guia-js.md
             }, 50);
         }
     });
