@@ -464,7 +464,7 @@ const Editor = (() => {
             emptyState.classList.add('hidden');
         }
 
-        // Delega la responsabilidad de dibujo avanzado (Función definida en: dibujarGrafo.js)
+        // Delega la responsabilidad de dibujo avanzado (Función definida en: visualizer.js)
         Visualizer.renderPreview(previewCanvas, currentGraph);
     }
 
@@ -530,7 +530,7 @@ const Editor = (() => {
         Sidebar.navigateTo('visualizer'); // Función definida en: sidebar.js
         
         setTimeout(() => {
-            Visualizer.loadGraph(graph); // Función definida en: dibujarGrafo.js
+            Visualizer.loadGraph(graph); // Función definida en: visualizer.js
             document.getElementById('graph-selector').value = id;
         }, 100);
     }

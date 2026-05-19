@@ -93,6 +93,14 @@ index.html
 **Promt 2**
 17/05/2026
 9:40pm
-Por motivos de conflictos con verciones del codigo en el git remoto y local, le pdi ayuda a la AI para resolverlo (ademas de estandarizar los comentarios)
+Por motivos de conflictos con verciones del codigo en el git remoto y local, le pdi ayuda a la AI para resolverlo (ademas de estandarizar los comentarios). Promt:
 
 El codigo ha sido editado, resuelve los errores que pueda tener y austa la documentacion de todos lor achivos a un estandar (El estandar es de: @contextScopeItemMention)
+
+**Pormt 3**
+19/05/26
+3:42pm
+Debido a la ultima separacion de codigos, se provoco una repeticion accidental de muchas podedazos del codigo, por lo que le dije a la AI que me ayudara a unificar muchas de estas funciones para evitar repetirlas tantas veces con este promt:
+
+Resulta que en @contextScopeItemMention tenemos varios archivos .js con toda la funcionalidad de la pagina, pero me e percadao de que existen varios que, por una diviscion anterior del codigo, poseen gran parte de si mismos en otro codigo, funciones identicas que son solo las mismas lineas de codigo. Unifica estas partes en un archivo, pero que en el index.html todo siga funcionando bien.
+Menciono esto porque @contextScopeItemMention  y @contextScopeItemMention  son casi el mismo codigo, varian en muy poquito y parecen lineas de codigo copias de la otra. Por lo que debes crear archivos que los unifiquen para avitar repetir funciones en el codigo general tantas veces

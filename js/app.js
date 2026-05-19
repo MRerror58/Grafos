@@ -12,7 +12,7 @@
  * antes de que el navegador lo haya dibujado, nos dará error.
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializa el módulo visualizador (Función definida en: dibujarGrafo.js)
+    // Inicializa el módulo visualizador (Función definida en: visualizer.js)
     Visualizer.init();
 
     // Inicializa el módulo editor (Función definida en: editor.js)
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Solicita el grafo guardado en memoria local (Función definida en: almacenamiento.js)
         const graph = Almacenamiento.buscarPorId(id);
         if (graph) {
-            // Si lo encuentra, le pide al visualizador que lo pinte (Función definida en: dibujarGrafo.js)
+            // Si lo encuentra, le pide al visualizador que lo pinte (Función definida en: visualizer.js)
             Visualizer.loadGraph(graph);
         }
     });

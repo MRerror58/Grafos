@@ -122,6 +122,9 @@ Para entender el proyecto GraphLab (y cualquier otra app web), debes ver cómo t
 
 **NOTAS (JUAN DAVID VASQUEZ CAÑAS)**
 
+# Tener en cuenta:
+Gran parte del codigo fue documentado por AI, sin hembargo, para mayor calridad y conciencia de que se reviso a fondo el codigo, existen pedazo del mismo donde aparece algo como "//Nota:..." Estas anotacion son echas manualmente por nosotros para dejar mas en claro que es lo que hace cada funcion y que al a hora de volver a revisar el codigo, no sea tan complejo de analizar.
+
 # Funciones Nativas de JavaScript (No definidas en nuestro código)
 
 A continuación se explican las funciones que utiliza nuestro proyecto que ya existen por defecto en JavaScript (incorporadas en el navegador o en la API de Canvas) y que no se definen dentro de nuestros archivos, detallando qué hacen, qué devuelven y un ejemplo.
