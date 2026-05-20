@@ -1,10 +1,10 @@
 /* =============================================================
-   VISUALIZADOR.CSS — Estilos del canvas donde se muestra el grafo
-   Contiene: contenedor del canvas, controles de zoom,
-   panel de información y estadísticas.
+   VISUALIZADOR.CSS - Styles for the canvas where the graph is shown
+   Contains: canvas container, zoom controls, information panel,
+   and statistics.
    ============================================================= */
 
-/* --- Contenedor principal del canvas --- */
+/* --- Main canvas container --- */
 .visualizer-container {
     flex: 1;
     position: relative;
@@ -29,7 +29,7 @@
     z-index: 5;
 }
 
-/* --- Controles flotantes (zoom, etiquetas, pesos) --- */
+/* --- Floating controls (zoom, labels, weights) --- */
 .canvas-controls {
     position: absolute;
     top: 16px;
@@ -50,7 +50,7 @@
     margin: 4px 0;
 }
 
-/* --- Panel de información del grafo cargado --- */
+/* --- Loaded graph information panel --- */
 .info-panel {
     position: absolute;
     bottom: 16px;

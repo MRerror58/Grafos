@@ -1,10 +1,10 @@
 /* =============================================================
-   EDITOR.CSS — Estilos de la página del editor de grafos
-   Contiene: layout de dos columnas, paneles de formulario,
-   preview del grafo, chips de nodos/aristas, grafos guardados.
+   EDITOR.CSS - Graph editor page styles
+   Contains: two-column layout, form panels, graph preview,
+   node/edge chips, and saved graphs.
    ============================================================= */
 
-/* --- Layout principal del editor (dos columnas) --- */
+/* --- Main editor layout (two columns) --- */
 .editor-layout {
     display: grid;
     grid-template-columns: 380px 1fr;
@@ -32,7 +32,7 @@
     background: var(--bg-primary);
 }
 
-/* --- Secciones dentro de los paneles --- */
+/* --- Sections inside panels --- */
 .panel-section {
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
@@ -56,7 +56,7 @@
     color: var(--accent);
 }
 
-/* --- Preview del grafo en el editor --- */
+/* --- Graph preview in the editor --- */
 .preview-canvas-wrapper {
     position: relative;
     background: var(--bg-primary);
@@ -77,7 +77,7 @@
     inset: 0;
 }
 
-/* --- Resumen del grafo actual (nodos y aristas) --- */
+/* --- Current graph summary (nodes and edges) --- */
 .graph-summary {
     display: flex;
     gap: 16px;
@@ -101,7 +101,7 @@
     font-family: var(--font-mono);
 }
 
-/* --- Chips (etiquetas de nodos y aristas) --- */
+/* --- Chips (node and edge labels) --- */
 .items-list {
     display: flex;
     flex-direction: column;
@@ -171,7 +171,7 @@
     font-style: italic;
 }
 
-/* --- Lista de grafos guardados --- */
+/* --- Saved graphs list --- */
 .saved-graphs-list {
     display: flex;
     flex-direction: column;

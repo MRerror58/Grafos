@@ -1,9 +1,9 @@
 /* =============================================================
-   COMPONENTES.CSS — Estilos de componentes reutilizables
-   Contiene: notificaciones toast y ventana modal de confirmación.
+   COMPONENTES.CSS - Reusable component styles
+   Contains: toast notifications and confirmation modal.
    ============================================================= */
 
-/* --- Notificaciones toast (mensajes temporales) --- */
+/* --- Toast notifications (temporary messages) --- */
 #toast-container {
     position: fixed;
     bottom: 24px;
@@ -65,7 +65,7 @@
     }
 }
 
-/* --- Modal de confirmación (para sobrescribir grafos) --- */
+/* --- Confirmation modal (for overwriting graphs) --- */
 .modal-overlay {
     position: fixed;
     inset: 0;

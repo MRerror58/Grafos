@@ -19,13 +19,13 @@
 </head>
 
 <body>
-    <!-- Sidebar (rendered by js/sidebar.js) -->
+    <!-- Sidebar (rendered by graph/ui/sidebar.js) -->
     <div id="sidebar-container"></div>
 
     <!-- Main Content Area -->
     <main id="main-content">
 
-        <!-- ==================== PAGE: VISUALIZADOR ==================== -->
+        <!-- ==================== PAGE: VISUALIZER ==================== -->
         <section id="page-visualizer" class="page active">
             <div class="page-header">
                 <div class="page-actions">
@@ -351,13 +351,14 @@
     <!-- Toast notifications -->
     <div id="toast-container"></div>
 
-    <!-- Scripts (orden importante: utilidades primero, app al final) -->
-    <script src="js/utilidades.js"></script>
-    <script src="js/almacenamiento.js"></script>
-    <script src="js/sidebar.js"></script>
-    <script src="js/visualizer.js"></script>
-    <script src="js/editor.js"></script>
-    <script src="js/app.js"></script>
+    <!-- Scripts (important order: shared helpers first, main entrypoint last) -->
+    <script src="graph/utils.js"></script>
+    <script src="graph/canvas.js"></script>
+    <script src="graph/storage/storage.js"></script>
+    <script src="graph/ui/sidebar.js"></script>
+    <script src="graph/visualizer.js"></script>
+    <script src="graph/editor.js"></script>
+    <script src="main.js"></script>
 </body>
 
 </html>

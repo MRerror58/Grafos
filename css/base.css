@@ -1,10 +1,10 @@
 /* =============================================================
-   BASE.CSS — Estilos generales del sitio
-   Contiene: variables de diseño, reset, sidebar, layout,
-   header de páginas, formularios, botones y utilidades.
+   BASE.CSS - General site styles
+   Contains: design variables, reset, sidebar, layout,
+   page headers, forms, buttons, and utilities.
    ============================================================= */
 
-/* --- Variables de diseño (colores, tamaños, fuentes) --- */
+/* --- Design variables (colors, sizes, fonts) --- */
 :root {
     --bg-primary: #0a0a0f;
     --bg-secondary: #111118;
@@ -41,7 +41,7 @@
     --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* --- Reset global --- */
+/* --- Global reset --- */
 *,
 *::before,
 *::after {
@@ -70,7 +70,7 @@ body {
     color: #fff;
 }
 
-/* --- Scrollbar personalizada --- */
+/* --- Custom scrollbar --- */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -89,7 +89,7 @@ body {
     background: var(--text-muted);
 }
 
-/* --- Sidebar (barra lateral de navegación) --- */
+/* --- Sidebar navigation --- */
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
@@ -251,7 +251,7 @@ body {
     transform: rotate(180deg);
 }
 
-/* --- Contenido principal --- */
+/* --- Main content --- */
 #main-content {
     flex: 1;
     overflow-y: auto;
@@ -283,7 +283,7 @@ body {
     }
 }
 
-/* --- Header de cada página --- */
+/* --- Page header --- */
 .page-header {
     height: var(--header-height);
     padding: 0 32px;
@@ -324,7 +324,7 @@ body {
     gap: 12px;
 }
 
-/* --- Controles de formulario --- */
+/* --- Form controls --- */
 .input-control,
 .select-control {
     background: var(--bg-tertiary);
@@ -389,7 +389,7 @@ body {
     border-radius: 3px;
 }
 
-/* --- Botones --- */
+/* --- Buttons --- */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -485,7 +485,7 @@ body {
     background: rgba(108, 99, 255, 0.12);
 }
 
-/* --- Layout de formularios --- */
+/* --- Form layout --- */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -513,7 +513,7 @@ body {
     flex: 2;
 }
 
-/* --- Estado vacío (usado en varias páginas) --- */
+/* --- Empty state (used on several pages) --- */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -545,12 +545,12 @@ body {
     font-size: 12px;
 }
 
-/* --- Utilidad para ocultar elementos --- */
+/* --- Hidden utility --- */
 .hidden {
     display: none !important;
 }
 
-/* --- Diseño responsive para pantallas pequeñas --- */
+/* --- Responsive layout for small screens --- */
 @media (max-width: 900px) {
     .editor-layout {
         grid-template-columns: 1fr;

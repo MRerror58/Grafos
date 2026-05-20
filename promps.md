@@ -1,106 +1,103 @@
-**ACA SE GUARDAN LOS PROMTS QUE LE DI AL AGENTE**
+**PROMPTS GIVEN TO THE AGENT ARE STORED HERE**
 
-**Promt 1**
+**Prompt 1**
 17/05/2026
 9:25pm
-Este promt fue para comentar y dar info al programador que vaya a leer el codigo de forma apropiada (Luego se le hizo un prosceso de reviscion para confirmar que todo estaba bien documentado y se resumieron grandes parte de comentario debido a ser insesarias. Ademas de le agregaron algunas otras para mayor claridad)
-Actúa en modo agente con acceso completo al proyecto y trabaja sobre todo el código del repositorio.
 
-Tu tarea es crear documentación clara, completa y extremadamente didáctica para estudiantes universitarios que están empezando en programación. El contenido debe ser fácil de entender para personas que ya conocen las bases de programación estructurada y orientada a objetos, así como eventos, pero que aún no dominan JavaScript, DOM, HTML/CSS ni el trabajo con múltiples archivos.
+This prompt was used to add comments and provide useful information for any programmer who reads the code. Afterward, the documentation was reviewed to confirm that everything was clear; large unnecessary comments were summarized, and a few extra notes were added for clarity.
 
-OBJETIVO PRINCIPAL
+Act as an agent with full project access and work across the whole repository.
 
-1. Documenta todo el código del proyecto.
-2. Explica qué hace cada función, método y bloque importante de código.
-3. En cada llamada a una función, indica dónde está definida.
-   - Debes escribir específicamente el archivo donde se define.
-   - Si la función está definida en el mismo archivo donde se llama, no pongas nada extra.
-4. Crea un archivo `.md` en la raíz del proyecto, fuera de todas las carpetas, con una guía de conceptos de JavaScript necesarios para entender este código.
+Your task is to create clear, complete, highly educational documentation for university students who are beginning to program. The content should be easy to understand for people who already know the basics of structured and object-oriented programming, as well as events, but who do not yet fully understand JavaScript, the DOM, HTML/CSS, or working with multiple files.
 
-REQUISITOS DE LA DOCUMENTACIÓN DEL CÓDIGO
+MAIN GOAL
 
-- Debes documentar todo el proyecto de forma completa.
-- Cada función debe tener una explicación simple, precisa y pedagógica.
-- Explica:
-  - qué recibe,
-  - qué hace,
-  - qué devuelve,
-  - por qué existe,
-  - y cómo se relaciona con el resto del código.
-- Si una función depende de otra, acláralo.
-- Si una parte del código usa eventos, DOM, selectores, atributos, clases o IDs, explícalo de forma didáctica.
-- Cuando aparezca una llamada a una función definida en otro archivo, indícalo así:
-  - `Función definida en: archivo.js`
-- Si la función está en el mismo archivo, no añadas esa nota.
+1. Document all project code.
+2. Explain what every function, method, and important code block does.
+3. For every function call, indicate where that function is defined.
+   - You must specifically write the file where it is defined.
+   - If the function is defined in the same file where it is called, do not add anything extra.
+4. Create a `.md` file in the project root, outside every folder, with a guide to the JavaScript concepts needed to understand this code.
 
-REQUISITOS DEL ARCHIVO `.md` EN LA RAÍZ
+CODE DOCUMENTATION REQUIREMENTS
 
-Crea un archivo llamado algo como `guia-js.md` o `javascript-basico.md` en la raíz del proyecto.
+- Document the whole project completely.
+- Every function must have a simple, precise, educational explanation.
+- Explain:
+  - what it receives,
+  - what it does,
+  - what it returns,
+  - why it exists,
+  - and how it relates to the rest of the code.
+- If a function depends on another one, explain that relationship.
+- If a code section uses events, DOM, selectors, attributes, classes, or IDs, explain it educationally.
+- When there is a call to a function defined in another file, indicate it like this:
+  - `Function defined in: file.js`
+- If the function is in the same file, do not add that note.
 
-Ese archivo debe explicar, de forma sencilla y orientada al código real del proyecto, los conceptos de JavaScript que un principiante necesita saber para entenderlo. Incluye, como mínimo:
+ROOT `.md` FILE REQUIREMENTS
 
-- Variables y constantes
-- Tipos de datos
-- Funciones
-- Objetos
+Create a file named something like `guia-js.md` or `javascript-basico.md` in the project root.
+
+That file must explain, in a simple way and oriented to the real project code, the JavaScript concepts a beginner needs in order to understand it. Include at least:
+
+- Variables and constants
+- Data types
+- Functions
+- Objects
 - Arrays
-- Condicionales
-- Ciclos
-- Eventos
+- Conditionals
+- Loops
+- Events
 - DOM
-- Cómo obtener elementos por `id`, `class`, `querySelector`, `querySelectorAll`
-- Manipulación de texto, clases y atributos
-- Uso de archivos separados y módulos, si aplica
-- Diferencia entre HTML, CSS y JavaScript dentro del proyecto
-- Qué significa que JavaScript interactúe con una página web
+- How to get elements by `id`, `class`, `querySelector`, `querySelectorAll`
+- Text, class, and attribute manipulation
+- Use of separate files and modules, if applicable
+- Difference between HTML, CSS, and JavaScript inside the project
+- What it means for JavaScript to interact with a web page
 
-IMPORTANTE SOBRE EL NIVEL DE EXPLICACIÓN
+IMPORTANT ABOUT EXPLANATION LEVEL
 
-- No asumas conocimientos avanzados de JavaScript.
-- No des explicaciones complicadas si existe una forma más simple de decirlo.
-- Usa lenguaje claro, directo y pedagógico.
-- Si usas términos técnicos, explícalos inmediatamente.
-- El objetivo es que un estudiante universitario principiante pueda entender el código sin problemas.
+- Do not assume advanced JavaScript knowledge.
+- Do not give complicated explanations if there is a simpler way to say something.
+- Use clear, direct, educational language.
+- If you use technical terms, explain them immediately.
+- The goal is for a beginner university student to understand the code without trouble.
 
-IMPORTANTE SOBRE EL CONTENIDO
+IMPORTANT ABOUT CONTENT
 
-- No inventes cosas que no estén en el código.
-- No omitas funciones, métodos ni partes importantes.
-- No resumas de forma vaga: documenta con suficiente detalle.
-- Mantén coherencia entre la explicación del código y la guía del archivo `.md`.
+- Do not invent anything that is not in the code.
+- Do not omit functions, methods, or important parts.
+- Do not summarize vaguely: document with enough detail.
+- Keep the explanation consistent with both the code and the `.md` guide.
 
-FORMATO DE ENTREGA
+DELIVERY FORMAT
 
-- Devuelve el resultado de forma ordenada.
-- Si modificas archivos, conserva la estructura del proyecto.
-- Si creas documentación dentro del código, hazla legible y uniforme.
-- Prioriza claridad, precisión y utilidad educativa.
+- Return the result in an organized way.
+- If you modify files, preserve the project structure.
+- If you create documentation inside the code, make it readable and uniform.
+- Prioritize clarity, precision, and educational value.
 
-ANTES DE EMPEZAR
+BEFORE STARTING
 
-Analiza todo el proyecto primero para entender su estructura, dependencias y flujo general. Luego genera la documentación y la guía de JavaScript con base en ese análisis.
+Analyze the whole project first to understand its structure, dependencies, and general flow. Then generate the documentation and JavaScript guide based on that analysis.
 
+JavaScript documentation should mainly be created in the JavaScript folder. If there are relationships with `styles.css` or `index.html`, you can document something there too, but that is not the priority.
 
-js
-la documentacion debe ser echa unicamente en esta carpeta. En dado caso de q hallan relaciones, puedes documentar algo en 
-
-styles.css
-o 
-
-index.html
- pero no es la prioridad para nada.
-
-**Promt 2**
+**Prompt 2**
 17/05/2026
 9:40pm
-Por motivos de conflictos con verciones del codigo en el git remoto y local, le pdi ayuda a la AI para resolverlo (ademas de estandarizar los comentarios). Promt:
 
-El codigo ha sido editado, resuelve los errores que pueda tener y austa la documentacion de todos lor achivos a un estandar (El estandar es de: @contextScopeItemMention)
+Because of conflicts between remote and local Git versions, I asked AI for help resolving them and standardizing comments. Prompt:
 
-**Pormt 3**
-19/05/26
+The code has been edited. Resolve any errors it may have and adjust the documentation in all files to a standard. The standard is: `@contextScopeItemMention`.
+
+**Prompt 3**
+19/05/2026
 3:42pm
-Debido a la ultima separacion de codigos, se provoco una repeticion accidental de muchas podedazos del codigo, por lo que le dije a la AI que me ayudara a unificar muchas de estas funciones para evitar repetirlas tantas veces con este promt:
 
-Resulta que en @contextScopeItemMention tenemos varios archivos .js con toda la funcionalidad de la pagina, pero me e percadao de que existen varios que, por una diviscion anterior del codigo, poseen gran parte de si mismos en otro codigo, funciones identicas que son solo las mismas lineas de codigo. Unifica estas partes en un archivo, pero que en el index.html todo siga funcionando bien.
-Menciono esto porque @contextScopeItemMention  y @contextScopeItemMention  son casi el mismo codigo, varian en muy poquito y parecen lineas de codigo copias de la otra. Por lo que debes crear archivos que los unifiquen para avitar repetir funciones en el codigo general tantas veces
+Because of the latest code separation, many code fragments were accidentally repeated. I asked AI to help unify many of these functions and avoid repeating them several times with this prompt:
+
+It turns out that in `@contextScopeItemMention` we have several `.js` files containing all page functionality, but I noticed that several of them, because of a previous code split, contain large parts that also exist in another file. These are identical functions with the same lines of code. Unify those parts into one file while keeping everything working correctly from `index.html`.
+
+I mention this because `@contextScopeItemMention` and `@contextScopeItemMention` are almost the same code; they only vary slightly and look like copied lines. Create files that unify those parts so repeated functions are avoided throughout the general code.

@@ -1,30 +1,29 @@
 /**
- * Editor Module — Permite crear y editar grafos usando la memoria del navegador.
- * 
- * Utiliza el Patrón Módulo (IIFE: Immediately Invoked Function Expression).
- * ¿Por qué?: Para encapsular (proteger) sus variables internas y no mezclar
- * la información del editor con la del visualizador.
+ * Editor Module - Creates and edits graphs using browser memory.
+ *
+ * Uses the Module Pattern (IIFE: Immediately Invoked Function Expression).
+ * Why?: To encapsulate internal variables and avoid mixing editor data with
+ * visualizer data.
  */
 const Editor = (() => {
-    // Objeto principal que representa el grafo que se está editando en este momento
+    // Main object representing the graph currently being edited.
     let currentGraph = {
         name: '',
-        type: 'undirected', // Puede ser 'undirected' (no dirigido) o 'directed' (dirigido)
-        weighted: false,    // Indica si las conexiones tienen un peso/valor numérico
-        nodes: [],          // Arreglo vacío que guardará los puntos (nodos)
-        edges: []           // Arreglo vacío que guardará las líneas (aristas)
+        type: 'undirected', // Can be 'undirected' or 'directed'.
+        weighted: false,    // Indicates whether edges have a numeric weight/value.
+        nodes: [],          // Empty array that stores points (nodes).
+        edges: []           // Empty array that stores lines (edges).
     };
 
-    // Contador que se usa para generar IDs únicos y automáticos para los nodos (ej: n1, n2, n3)
+    // Counter used to generate unique automatic node IDs (example: n1, n2, n3).
     let nodeIdCounter = 0;
 
     /**
-     * Función: init
-     * ¿Qué recibe?: Nada.
-     * ¿Qué hace?: Es la función de arranque del editor. Asigna los eventos a los botones, 
-     * carga la lista de grafos guardados y muestra la vista previa inicial (vacía).
-     * ¿Qué devuelve?: Nada.
-     * ¿Por qué existe?: Para preparar la herramienta de edición en cuanto la página carga.
+     * Function: init
+     * What does it receive?: Nothing.
+     * What does it do?: Starts the editor, assigns button events, loads saved graphs,
+     * and shows the initial empty preview.
+     * What does it return?: Nothing.
      */
     function init() {
         bindEvents();
@@ -33,34 +32,32 @@ const Editor = (() => {
     }
 
     /**
-     * Función: bindEvents
-     * ¿Qué recibe?: Nada.
-     * ¿Qué hace?: Conecta el HTML con JavaScript. Busca elementos por su ID y les 
-     * asigna "escuchadores" (event listeners) para saber cuándo el usuario hace clic o teclea.
-     * ¿Qué devuelve?: Nada.
-     * ¿Por qué existe?: Es una buena práctica agrupar todos los eventos en un solo lugar.
+     * Function: bindEvents
+     * What does it receive?: Nothing.
+     * What does it do?: Connects HTML controls with JavaScript event listeners.
+     * What does it return?: Nothing.
      */
     function bindEvents() {
-        // Clics en botones principales
+        // Main button clicks.
         document.getElementById('btn-add-node').addEventListener('click', addNode);
         document.getElementById('btn-add-edge').addEventListener('click', addEdge);
         document.getElementById('btn-save-graph').addEventListener('click', saveGraph);
         document.getElementById('btn-clear-form').addEventListener('click', clearForm);
 
-        // Evento 'change' se activa cuando un menú desplegable (select) cambia su valor.
+        // The 'change' event runs when a select menu changes value.
         document.getElementById('graph-weighted').addEventListener('change', function() {
             currentGraph.weighted = this.value === 'yes';
-            // Modificamos CSS directamente usando JS (.style.display)
+            // Modifies CSS directly with JS (.style.display).
             document.getElementById('weight-group').style.display = this.value === 'yes' ? 'flex' : 'none';
         });
 
-        // Evento cuando se cambia el tipo de grafo (dirigido/no dirigido)
+        // Event for directed/undirected graph type changes.
         document.getElementById('graph-type').addEventListener('change', function() {
             currentGraph.type = this.value;
-            updatePreview(); // Volvemos a dibujar la previsualización porque las líneas cambian
+            updatePreview();
         });
 
-        // Atajos de teclado para agregar con "Enter"
+        // Keyboard shortcuts for adding items with Enter.
         document.getElementById('node-label').addEventListener('keydown', e => {
             if (e.key === 'Enter') addNode();
         });
@@ -69,72 +66,70 @@ const Editor = (() => {
         });
     }
 
-    // ===== GESTIÓN DE NODOS =====
+    // ===== NODE MANAGEMENT =====
 
     /**
-     * Función: addNode
-     * ¿Qué recibe?: Nada.
-     * ¿Qué hace?: Lee lo que el usuario escribió (nombre y color), verifica que no existan errores, 
-     * crea un nuevo objeto que representa al nodo y lo guarda en el arreglo global.
-     * ¿Qué devuelve?: Nada.
-     * ¿Por qué existe?: Es el núcleo de la creación de datos del grafo.
+     * Function: addNode
+     * What does it receive?: Nothing.
+     * What does it do?: Reads the user's label/color, validates the data, creates a node,
+     * and stores it in the current graph.
+     * What does it return?: Nothing.
      */
     function addNode() {
         const labelInput = document.getElementById('node-label');
         const colorInput = document.getElementById('node-color');
-        
-        // .trim() limpia los espacios en blanco accidentales que el usuario haya puesto al principio o final
+
+        // .trim() removes accidental spaces at the beginning or end.
         const label = labelInput.value.trim();
 
         if (!label) {
-            showToast('Ingresa una etiqueta para el nodo', 'error'); // Función definida en: utilidades.js
+            showToast('Ingresa una etiqueta para el nodo', 'error'); // Function defined in: graph/utils.js
             labelInput.focus();
             return;
         }
 
-        // El método find() recorre el arreglo buscando uno con la misma etiqueta
+        // find() searches the array for an item with the same label.
         if (currentGraph.nodes.find(n => n.label.toLowerCase() === label.toLowerCase())) {
-            showToast('Ya existe un nodo con esa etiqueta', 'error'); // Función definida en: utilidades.js
+            showToast('Ya existe un nodo con esa etiqueta', 'error'); // Function defined in: graph/utils.js
             return;
         }
 
-        // Se crea el "Objeto Nodo" que viajará por todo el código
+        // Creates the Node object that travels through the app.
         const node = {
-            id: 'n' + (++nodeIdCounter), 
+            id: 'n' + (++nodeIdCounter),
             label: label,
             color: colorInput.value
         };
 
-        // .push() mete este nuevo objeto al final del arreglo
+        // .push() adds this object to the end of the array.
         currentGraph.nodes.push(node);
-        labelInput.value = ''; // Limpiamos la cajita de texto para el próximo
+        labelInput.value = '';
 
-        // Mandamos a actualizar la interfaz gráfica
+        // Updates the visual interface.
         updateNodeSelectors();
         updateNodesList();
         updateSummary();
         updatePreview();
-        
-        showToast(`Nodo "${label}" agregado`, 'success'); // Función definida en: utilidades.js
+
+        showToast(`Nodo "${label}" agregado`, 'success'); // Function defined in: graph/utils.js
         labelInput.focus();
     }
 
     /**
-     * Función: removeNode
-     * ¿Qué recibe?: 
-     *  - id (texto): El identificador único interno del nodo (ej: 'n2').
-     * ¿Qué hace?: Borra el nodo de la lista, pero también es responsable de borrar las conexiones
-     * (aristas) que estaban enganchadas a ese nodo.
-     * ¿Qué devuelve?: Nada.
+     * Function: removeNode
+     * What does it receive?:
+     *  - id (text): Internal unique node ID (example: 'n2').
+     * What does it do?: Removes the node and every edge connected to it.
+     * What does it return?: Nothing.
      */
     function removeNode(id) {
-        // filter() crea un nuevo arreglo que SOLO contiene los elementos que cumplen la condición.
+        // filter() creates a new array containing only items that match the condition.
         currentGraph.nodes = currentGraph.nodes.filter(n => n.id !== id);
-        
-        // Hacemos lo mismo con las aristas: eliminamos aquellas asociadas al nodo borrado.
+
+        // Removes every edge associated with the deleted node.
         currentGraph.edges = currentGraph.edges.filter(e => e.from !== id && e.to !== id);
-        
-        // Refrescamos la vista
+
+        // Refreshes the view.
         updateNodeSelectors();
         updateNodesList();
         updateEdgesList();
@@ -142,14 +137,14 @@ const Editor = (() => {
         updatePreview();
     }
 
-    // ===== GESTIÓN DE ARISTAS =====
+    // ===== EDGE MANAGEMENT =====
 
     /**
-     * Función: addEdge
-     * ¿Qué recibe?: Nada.
-     * ¿Qué hace?: Toma los dos nodos seleccionados, verifica que la línea entre ellos no se haya 
-     * dibujado antes, y añade el objeto a la lista de aristas.
-     * ¿Qué devuelve?: Nada.
+     * Function: addEdge
+     * What does it receive?: Nothing.
+     * What does it do?: Reads the selected origin/destination nodes, validates that the
+     * connection is not duplicated, and stores the edge.
+     * What does it return?: Nothing.
      */
     function addEdge() {
         const fromSelect = document.getElementById('edge-from');
@@ -160,11 +155,11 @@ const Editor = (() => {
         const to = toSelect.value;
 
         if (!from || !to) {
-            showToast('Selecciona origen y destino', 'error'); // Función definida en: utilidades.js
+            showToast('Selecciona origen y destino', 'error'); // Function defined in: graph/utils.js
             return;
         }
 
-        // Revisar si el usuario intenta crear una conexión duplicada
+        // Checks whether the user is trying to create a duplicate connection.
         const duplicate = currentGraph.edges.find(e => {
             if (currentGraph.type === 'undirected') {
                 return (e.from === from && e.to === to) || (e.from === to && e.to === from);
@@ -173,83 +168,83 @@ const Editor = (() => {
         });
 
         if (duplicate) {
-            showToast('Esa arista ya existe', 'error'); // Función definida en: utilidades.js
+            showToast('Esa arista ya existe', 'error'); // Function defined in: graph/utils.js
             return;
         }
 
         const edge = { from, to };
-        
-        // Si el grafo soporta "pesos" (distancias, costos), lo guardamos también
+
+        // If the graph supports weights, store the numeric value too.
         if (currentGraph.weighted) {
             edge.weight = parseFloat(weightInput.value) || 1;
         }
 
         currentGraph.edges.push(edge);
-        
+
         updateEdgesList();
         updateSummary();
         updatePreview();
 
         const fromLabel = currentGraph.nodes.find(n => n.id === from)?.label || from;
         const toLabel = currentGraph.nodes.find(n => n.id === to)?.label || to;
-        showToast(`Arista ${fromLabel} → ${toLabel} agregada`, 'success'); // Función definida en: utilidades.js
+        showToast(`Arista ${fromLabel} -> ${toLabel} agregada`, 'success'); // Function defined in: graph/utils.js
     }
 
     /**
-     * Función: removeEdge
-     * ¿Qué recibe?: 
-     *  - index (número): La posición exacta de la arista en el arreglo (0, 1, 2...).
-     * ¿Qué hace?: Elimina esa arista directamente.
-     * ¿Qué devuelve?: Nada.
+     * Function: removeEdge
+     * What does it receive?:
+     *  - index (number): Exact edge position in the array (0, 1, 2...).
+     * What does it do?: Removes that edge directly.
+     * What does it return?: Nothing.
      */
     function removeEdge(index) {
-        // splice() modifica el arreglo original eliminando elementos.
+        // splice() modifies the original array by removing elements.
         currentGraph.edges.splice(index, 1);
-        
+
         updateEdgesList();
         updateSummary();
         updatePreview();
     }
 
-    // ===== GUARDAR / CARGAR =====
+    // ===== SAVE / LOAD =====
 
     /**
-     * Función: saveGraph
-     * ¿Qué recibe?: Nada.
-     * ¿Qué hace?: Valida los datos antes de guardar. Si el usuario escribe un nombre 
-     * que ya existe, pausa todo y abre un panel (modal) preguntando si desea sobreescribir.
-     * ¿Qué devuelve?: Nada.
+     * Function: saveGraph
+     * What does it receive?: Nothing.
+     * What does it do?: Validates data before saving. If a graph with the same name
+     * exists, it opens a modal asking whether to overwrite it.
+     * What does it return?: Nothing.
      */
     function saveGraph() {
         const nameInput = document.getElementById('graph-name');
         const name = nameInput.value.trim();
 
         if (!name) {
-            showToast('Ingresa un nombre para el grafo', 'error'); // Función definida en: utilidades.js
+            showToast('Ingresa un nombre para el grafo', 'error'); // Function defined in: graph/utils.js
             nameInput.focus();
             return;
         }
 
         if (currentGraph.nodes.length === 0) {
-            showToast('Agrega al menos un nodo', 'error'); // Función definida en: utilidades.js
+            showToast('Agrega al menos un nodo', 'error'); // Function defined in: graph/utils.js
             return;
         }
 
-        currentGraph.name = name; // Guardamos el nombre en el grafo actual
+        currentGraph.name = name;
 
-        // Buscar en la base de datos (localStorage) usando el módulo de almacenamiento
-        const existingGraph = Almacenamiento.buscarPorNombre(name); // Función definida en: almacenamiento.js
+        // Searches the database (localStorage) through the storage module.
+        const existingGraph = Almacenamiento.buscarPorNombre(name); // Function defined in: graph/storage/storage.js
 
-        // Si ya existe, abrimos la ventana de confirmación (Modal)
+        // If it already exists, open the confirmation modal.
         if (existingGraph) {
             const modal = document.getElementById('confirm-modal');
             document.getElementById('confirm-graph-name').textContent = name;
-            modal.classList.remove('hidden'); // Hacer visible la ventana
+            modal.classList.remove('hidden');
 
             const btnCancel = document.getElementById('btn-confirm-cancel');
             const btnOverwrite = document.getElementById('btn-confirm-overwrite');
 
-            // Funciones temporales para estos botones
+            // Temporary functions for these buttons.
             const onCancel = () => {
                 modal.classList.add('hidden');
                 cleanup();
@@ -258,8 +253,8 @@ const Editor = (() => {
             const onOverwrite = () => {
                 modal.classList.add('hidden');
                 cleanup();
-                // Llama a performSave indicándole específicamente cuál ID debe sobreescribir
-                performSave(existingGraph.id); 
+                // Calls performSave with the exact ID that should be overwritten.
+                performSave(existingGraph.id);
             };
 
             const cleanup = () => {
@@ -272,55 +267,55 @@ const Editor = (() => {
             return;
         }
 
-        // Si no existía uno igual, se guarda directamente como nuevo
+        // If no graph with the same name exists, save as new.
         performSave();
     }
 
     /**
-     * Función: performSave
-     * ¿Qué recibe?: 
-     *  - overrideId (texto, opcional): ID a sobreescribir. Si no se manda, es 'null'.
-     * ¿Qué hace?: Llama al módulo de Almacenamiento para guardar el trabajo.
-     * ¿Qué devuelve?: Nada.
+     * Function: performSave
+     * What does it receive?:
+     *  - overrideId (text, optional): ID to overwrite. If omitted, it is 'null'.
+     * What does it do?: Calls the Storage module to save the work.
+     * What does it return?: Nothing.
      */
     function performSave(overrideId = null) {
-        // Guarda en localStorage (Función definida en: almacenamiento.js)
-        Almacenamiento.guardarGrafo(currentGraph, overrideId);
+        // Saves to localStorage.
+        Almacenamiento.guardarGrafo(currentGraph, overrideId); // Function defined in: graph/storage/storage.js
 
-        // Refrescamos paneles
+        // Refreshes panels.
         loadSavedGraphsList();
         refreshVisualizerSelector();
-        showToast(overrideId ? `Grafo "${currentGraph.name}" sobrescrito exitosamente` : `Grafo "${currentGraph.name}" guardado exitosamente`, 'success'); // Función definida en: utilidades.js
+        showToast(overrideId ? `Grafo "${currentGraph.name}" sobrescrito exitosamente` : `Grafo "${currentGraph.name}" guardado exitosamente`, 'success'); // Function defined in: graph/utils.js
     }
 
     /**
-     * Función: deleteGraph
-     * ¿Qué recibe?: 
-     *  - id (texto): El identificador del grafo a borrar.
-     * ¿Qué hace?: Llama al módulo Almacenamiento para borrarlo y refresca la lista.
-     * ¿Qué devuelve?: Nada.
+     * Function: deleteGraph
+     * What does it receive?:
+     *  - id (text): Graph identifier.
+     * What does it do?: Calls the Storage module to delete it and refreshes the list.
+     * What does it return?: Nothing.
      */
     function deleteGraph(id) {
-        Almacenamiento.eliminarGrafo(id); // Función definida en: almacenamiento.js
-        
+        Almacenamiento.eliminarGrafo(id); // Function defined in: graph/storage/storage.js
+
         loadSavedGraphsList();
         refreshVisualizerSelector();
-        showToast('Grafo eliminado', 'info'); // Función definida en: utilidades.js
+        showToast('Grafo eliminado', 'info'); // Function defined in: graph/utils.js
     }
 
     /**
-     * Función: loadGraphToEditor
-     * ¿Qué recibe?: 
-     *  - id (texto): Identificador del grafo.
-     * ¿Qué hace?: Trae un grafo viejo desde la memoria hacia las variables en vivo 
-     * (`currentGraph`) para poder seguir trabajándolo en pantalla.
-     * ¿Qué devuelve?: Nada.
+     * Function: loadGraphToEditor
+     * What does it receive?:
+     *  - id (text): Graph identifier.
+     * What does it do?: Loads an old graph from memory into `currentGraph` so it can
+     * be edited on screen.
+     * What does it return?: Nothing.
      */
     function loadGraphToEditor(id) {
-        const graph = Almacenamiento.buscarPorId(id); // Función definida en: almacenamiento.js
+        const graph = Almacenamiento.buscarPorId(id); // Function defined in: graph/storage/storage.js
         if (!graph) return;
 
-        // Clonamos el grafo encontrado hacia nuestra área de trabajo
+        // Clones the found graph into the working area.
         currentGraph = {
             name: graph.name,
             type: graph.type,
@@ -329,43 +324,43 @@ const Editor = (() => {
             edges: [...graph.edges]
         };
 
-        // Rellenamos el HTML con los valores antiguos
+        // Fills the HTML controls with the old values.
         document.getElementById('graph-name').value = graph.name;
         document.getElementById('graph-type').value = graph.type;
         document.getElementById('graph-weighted').value = graph.weighted ? 'yes' : 'no';
         document.getElementById('weight-group').style.display = graph.weighted ? 'flex' : 'none';
 
-        // Tenemos que actualizar el contador interno de IDs para que siga creciendo bien.
+        // Updates the internal ID counter so it keeps growing correctly.
         nodeIdCounter = 0;
         currentGraph.nodes.forEach(n => {
             const num = parseInt(n.id.replace('n', ''));
             if (num > nodeIdCounter) nodeIdCounter = num;
         });
 
-        // Repintamos la pantalla
+        // Repaints the screen.
         updateNodeSelectors();
         updateNodesList();
         updateEdgesList();
         updateSummary();
         updatePreview();
-        
-        showToast(`Grafo "${graph.name}" cargado en el editor`, 'info'); // Función definida en: utilidades.js
+
+        showToast(`Grafo "${graph.name}" cargado en el editor`, 'info'); // Function defined in: graph/utils.js
     }
 
     /**
-     * Función: clearForm
-     * ¿Qué hace?: Resetea absolutamente todo, dejando la hoja en blanco.
+     * Function: clearForm
+     * What does it do?: Resets everything, leaving a blank graph form.
      */
     function clearForm() {
         currentGraph = { name: '', type: 'undirected', weighted: false, nodes: [], edges: [] };
         nodeIdCounter = 0;
-        
+
         document.getElementById('graph-name').value = '';
         document.getElementById('graph-type').value = 'undirected';
         document.getElementById('graph-weighted').value = 'no';
         document.getElementById('weight-group').style.display = 'none';
         document.getElementById('node-label').value = '';
-        
+
         updateNodeSelectors();
         updateNodesList();
         updateEdgesList();
@@ -373,26 +368,26 @@ const Editor = (() => {
         updatePreview();
     }
 
-    // ===== ACTUALIZACIONES DE INTERFAZ (UI) =====
+    // ===== INTERFACE UPDATES (UI) =====
 
     /**
-     * Función: updateNodeSelectors
-     * ¿Qué hace?: Toma la lista de nodos y construye el código HTML `<option>...</option>`
-     * necesario para los menús desplegables de conectar aristas.
+     * Function: updateNodeSelectors
+     * What does it do?: Builds the `<option>...</option>` HTML needed by the edge
+     * origin and destination dropdowns.
      */
     function updateNodeSelectors() {
         const options = currentGraph.nodes.map(n =>
             `<option value="${n.id}">${n.label}</option>`
         ).join('');
-        
-        const placeholder = '<option value="">—</option>';
+
+        const placeholder = '<option value="">-</option>';
         document.getElementById('edge-from').innerHTML = placeholder + options;
         document.getElementById('edge-to').innerHTML = placeholder + options;
     }
 
     /**
-     * Función: updateNodesList
-     * ¿Qué hace?: Pinta las pequeñas "píldoras" o chips que representan a los nodos creados.
+     * Function: updateNodesList
+     * What does it do?: Draws the small chips that represent created nodes.
      */
     function updateNodesList() {
         const container = document.getElementById('nodes-list');
@@ -400,7 +395,7 @@ const Editor = (() => {
             container.innerHTML = '<span class="empty-chip">Sin nodos</span>';
             return;
         }
-        
+
         container.innerHTML = currentGraph.nodes.map(n => `
             <span class="chip">
                 <span class="chip-dot" style="background:${n.color}"></span>
@@ -413,8 +408,8 @@ const Editor = (() => {
     }
 
     /**
-     * Función: updateEdgesList
-     * ¿Qué hace?: Pinta la lista visual indicando qué nodos están conectados.
+     * Function: updateEdgesList
+     * What does it do?: Draws the visual list that shows which nodes are connected.
      */
     function updateEdgesList() {
         const container = document.getElementById('edges-list');
@@ -422,13 +417,13 @@ const Editor = (() => {
             container.innerHTML = '<span class="empty-chip">Sin aristas</span>';
             return;
         }
-        
+
         container.innerHTML = currentGraph.edges.map((e, i) => {
             const fromLabel = currentGraph.nodes.find(n => n.id === e.from)?.label || '?';
             const toLabel = currentGraph.nodes.find(n => n.id === e.to)?.label || '?';
-            const arrow = currentGraph.type === 'directed' ? '→' : '↔';
+            const arrow = currentGraph.type === 'directed' ? '->' : '<->';
             const weightStr = currentGraph.weighted && e.weight !== undefined ? ` (${e.weight})` : '';
-            
+
             return `
                 <span class="chip">
                     ${fromLabel} ${arrow} ${toLabel}${weightStr}
@@ -441,8 +436,8 @@ const Editor = (() => {
     }
 
     /**
-     * Función: updateSummary
-     * ¿Qué hace?: Actualiza el contador inferior de nodos y aristas.
+     * Function: updateSummary
+     * What does it do?: Updates the lower node and edge counters.
      */
     function updateSummary() {
         document.getElementById('summary-nodes').textContent = currentGraph.nodes.length;
@@ -450,9 +445,8 @@ const Editor = (() => {
     }
 
     /**
-     * Función: updatePreview
-     * ¿Qué hace?: Administra el pequeño recuadro de previsualización enviándole los 
-     * datos del grafo al motor principal del Visualizador.
+     * Function: updatePreview
+     * What does it do?: Manages the preview panel and sends graph data to the visualizer engine.
      */
     function updatePreview() {
         const previewCanvas = document.getElementById('preview-canvas');
@@ -464,17 +458,17 @@ const Editor = (() => {
             emptyState.classList.add('hidden');
         }
 
-        // Delega la responsabilidad de dibujo avanzado (Función definida en: visualizer.js)
-        Visualizer.renderPreview(previewCanvas, currentGraph);
+        // Delegates advanced drawing to the visualizer.
+        Visualizer.renderPreview(previewCanvas, currentGraph); // Function defined in: graph/visualizer.js
     }
 
     /**
-     * Función: loadSavedGraphsList
-     * ¿Qué hace?: Lee la memoria y dibuja la lista visual de todos los proyectos creados.
+     * Function: loadSavedGraphsList
+     * What does it do?: Reads browser memory and draws the list of saved projects.
      */
     function loadSavedGraphsList() {
         const container = document.getElementById('saved-graphs-list');
-        const saved = Almacenamiento.obtenerGrafos(); // Función definida en: almacenamiento.js
+        const saved = Almacenamiento.obtenerGrafos(); // Function defined in: graph/storage/storage.js
 
         if (saved.length === 0) {
             container.innerHTML = `
@@ -488,7 +482,7 @@ const Editor = (() => {
         container.innerHTML = saved.map(g => {
             const date = new Date(g.createdAt);
             const dateStr = date.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
-            
+
             return `
                 <div class="saved-graph-card">
                     <div class="saved-graph-info">
@@ -516,41 +510,44 @@ const Editor = (() => {
     }
 
     /**
-     * Función: visualizeGraph
-     * ¿Qué recibe?: 
-     *  - id (texto): El identificador del grafo guardado.
-     * ¿Qué hace?: Toma un grafo de la memoria, se cambia de pantalla hacia el visualizador
-     * y le ordena dibujar la red allí.
-     * ¿Qué devuelve?: Nada.
+     * Function: visualizeGraph
+     * What does it receive?:
+     *  - id (text): The saved graph identifier.
+     * What does it do?: Loads a graph from memory, moves to the visualizer screen,
+     * and asks the visualizer to draw it there.
+     * What does it return?: Nothing.
      */
     function visualizeGraph(id) {
-        const graph = Almacenamiento.buscarPorId(id); // Función definida en: almacenamiento.js
+        const graph = Almacenamiento.buscarPorId(id); // Function defined in: graph/storage/storage.js
         if (!graph) return;
-        
-        Sidebar.navigateTo('visualizer'); // Función definida en: sidebar.js
-        
+
+        Sidebar.navigateTo('visualizer'); // Function defined in: graph/ui/sidebar.js
+
         setTimeout(() => {
-            Visualizer.loadGraph(graph); // Función definida en: visualizer.js
+            Visualizer.loadGraph(graph); // Function defined in: graph/visualizer.js
             document.getElementById('graph-selector').value = id;
         }, 100);
     }
 
     /**
-     * Función: refreshVisualizerSelector
-     * ¿Qué hace?: Reconstruye la lista desplegable en la pantalla grande del visualizador.
+     * Function: refreshVisualizerSelector
+     * What does it do?: Rebuilds the dropdown list in the large visualizer screen.
      */
     function refreshVisualizerSelector() {
         const selector = document.getElementById('graph-selector');
-        const saved = Almacenamiento.obtenerGrafos(); // Función definida en: almacenamiento.js
-        
-        selector.innerHTML = '<option value="">— Seleccionar grafo —</option>' +
+        const saved = Almacenamiento.obtenerGrafos(); // Function defined in: graph/storage/storage.js
+
+        selector.innerHTML = '<option value="">- Seleccionar grafo -</option>' +
             saved.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
     }
 
-    // El objeto final define qué métodos pueden llamar otros archivos (como app.js)
+    // The final object defines which methods other files can call.
     return {
         init, addNode, removeNode, addEdge, removeEdge,
         saveGraph, deleteGraph, loadGraphToEditor, clearForm,
         visualizeGraph, refreshVisualizerSelector
     };
 })();
+
+// Exposes the module for classic browser scripts and inline handlers.
+window.Editor = Editor;
