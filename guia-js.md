@@ -218,3 +218,8 @@ A continuación se explican las funciones que utiliza nuestro proyecto que ya ex
   - **Qué hace:** Cancela una solicitud de animación en cola que se haya registrado previamente con `requestAnimationFrame`.
   - **Qué devuelve:** Nada (`undefined`).
   - **Ejemplo de retorno:** `undefined`
+
+- **`fillText(texto, x, y)`**
+  - **Qué hace:** Dibuja físicamente un texto relleno sobre el Canvas usando la fuente, tamaño, alineación y color configurados actualmente en el pincel 2D.
+  - **Qué devuelve:** Nada (`undefined`).
+  - **Ejemplo de retorno:** `undefined`

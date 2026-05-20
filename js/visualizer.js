@@ -536,19 +536,33 @@ const Visualizer = (() => {
      * el ángulo exacto de la línea y pintar un triángulo en la punta que mire
      * hacia la dirección correcta.
      */
-    function drawArrow(source, target) {
+    function drawArrow(source, target) {//Nota: Triangulo de la punta (ver la nota interna para entender bien)
         // Obtenemos el ángulo matemático de la línea
         const angle = Math.atan2(target.y - source.y, target.x - source.x);
 
         // Hacemos que la punta de la flecha termine exactamente en el borde del círculo del nodo, no en el centro
         const tipX = target.x - NODE_RADIUS * Math.cos(angle);
         const tipY = target.y - NODE_RADIUS * Math.sin(angle);
+        /**
+         * Nota:
+         * target.x/y = Coordenadas del nodo destino
+         * NODE_RADIUS = Radio del nodo (para que la flecha no se meta adentro)
+         * Math.cos(angle) y Math.sin(angle) = Para calcular el desplazamiento en X e Y según el ángulo de la línea
+         */
 
         const arrowLen = 12; // Largo de la flecha
 
         // Trazamos el triángulo y lo rellenamos
+        /**
+         * Nota:
+         * Primero levantamos el lapiz, definimos el relleno de la forma (cerrada)
+         * Movemos el lapiz a la punta de la flecha (ctx.moveTo(x, y))
+         * Luego movemos hacia las otras dos esquinas (ctx.lineTo(x, y)2)
+         * Cerramos la figura con ctx.closePath()
+         * Rellenamos con ctx.fill() usando el color definido en ctx.fillStyle
+         */
         ctx.beginPath(); // guia-js.md
-        ctx.fillStyle = 'rgba(108, 99, 255, 0.6)';
+        ctx.fillStyle = 'rgba(108, 99, 255, 0.7)';
         ctx.moveTo(tipX, tipY); // guia-js.md
         ctx.lineTo( // guia-js.md
             tipX - arrowLen * Math.cos(angle - Math.PI / 7),
@@ -567,19 +581,26 @@ const Visualizer = (() => {
      * ¿Qué hace?: Recorre cada nodo y dibuja varias capas encima: el brillo,
      * el círculo sólido, el borde, el punto central y por último su nombre.
      */
-    function drawNodes() {
+    function drawNodes() {//Nota: Todos los parametros dibujados de los nodos
         nodes.forEach(n => {
             // Función definida en: utilidades.js (hexToRgba)
             // Capa 1: Brillo exterior difuminado (Radial Gradient)
-            const gradient = ctx.createRadialGradient(n.x, n.y, NODE_RADIUS * 0.5, n.x, n.y, NODE_RADIUS * 2.5);
-            gradient.addColorStop(0, hexToRgba(n.color, 0.15));
+            /**
+             * Nota:
+             * Primero se crea un gradiente (revisa la primera linea, es intuitiva).
+             * En la siguiente hay que clara q el primero valor (0 o 1) es para definir desde donde el gradiente
+             * (dentro o afuera respectivamente), luego hexToRgba() convierte un RBG a RGBA con trasparencia.
+             * Lo demas es levantar el lapiz, rellenar con el gradiente, definit el radio del circulo y rellenar.
+             */
+            const gradient = ctx.createRadialGradient(n.x, n.y, NODE_RADIUS * 0.8, n.x, n.y, NODE_RADIUS * 2);
+            gradient.addColorStop(0, hexToRgba(n.color, 0.25));
             gradient.addColorStop(1, 'transparent');
             ctx.beginPath(); // guia-js.md
             ctx.fillStyle = gradient;
             ctx.arc(n.x, n.y, NODE_RADIUS * 2.5, 0, Math.PI * 2); // guia-js.md
             ctx.fill(); // guia-js.md
 
-            // Capa 2: Círculo principal del nodo
+            // Capa 2: Círculo principal del nodo (el transparente)
             ctx.beginPath(); // guia-js.md
             ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2); // guia-js.md
             ctx.fillStyle = hexToRgba(n.color, 0.15); // Fondo transparente
@@ -587,18 +608,18 @@ const Visualizer = (() => {
 
             // Capa 3: Borde sólido del nodo
             ctx.strokeStyle = n.color;
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 2;
             ctx.stroke(); // guia-js.md
 
             // Capa 4: Punto pequeño sólido en el centro exacto
             ctx.beginPath(); // guia-js.md
-            ctx.arc(n.x, n.y, 4, 0, Math.PI * 2); // guia-js.md
+            ctx.arc(n.x, n.y, 5, 0, Math.PI * 2); // guia-js.md
             ctx.fillStyle = n.color;
             ctx.fill(); // guia-js.md
 
             // Capa 5: Nombre del nodo en texto (si el usuario no lo ocultó)
             if (showLabels) {
-                ctx.font = '600 12px "Inter", sans-serif';
+                ctx.font = '750 12px "Inter", sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#e8e8f0'; // Texto claro
