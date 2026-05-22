@@ -5,6 +5,8 @@
  * and the editor preview. Keeping these routines here prevents duplicated
  * resizing, circular layout, edge drawing, arrowhead drawing, and node drawing.
  */
+
+//Note: This archive was saw for explain all details in notes and comments.
 const GraphCanvas = (() => {
     // Default color palette used when a node does not provide its own color.
     const DEFAULT_COLORS = [
@@ -13,14 +15,14 @@ const GraphCanvas = (() => {
         '#FB923C', '#60A5FA', '#C084FC', '#22D3EE'
     ];
 
-    const NODE_RADIUS = 22; // Standard radius for nodes in the full visualizer.
+    const NODE_RADIUS = 16; // Standard radius for nodes in the full visualizer.
 
     /**
      * Function: getPixelRatio
      * What does it do?: Reads the browser pixel ratio with a safe fallback.
      * What does it return?: A number used to keep canvas drawings sharp.
      */
-    function getPixelRatio() {
+    function getPixelRatio() {// Note: This is the real pixel ratio of the screen.
         return window.devicePixelRatio || 1;
     }
 
@@ -31,13 +33,15 @@ const GraphCanvas = (() => {
      * What does it do?: Resizes the canvas internal pixel buffer and visual CSS size.
      * What does it return?: The context and the logical width/height of the canvas.
      */
-    function resizeToParent(canvasEl) {
+    function resizeToParent(canvasEl) {// Note: This function resizes the canvas to match its parent.
+        //Note create bases variables.
         const ctx = canvasEl.getContext('2d'); // guia-js.md
         const parent = canvasEl.parentElement;
         const ratio = getPixelRatio();
         const width = parent.clientWidth;
         const height = parent.clientHeight;
 
+        //Note: Styles changes.
         canvasEl.width = width * ratio;
         canvasEl.height = height * ratio;
         canvasEl.style.width = width + 'px';
@@ -80,7 +84,7 @@ const GraphCanvas = (() => {
             const dx = x - n.x;
             const dy = y - n.y;
             // If the distance to the center is smaller than the radius, the node was touched.
-            if (dx * dx + dy * dy <= (radius + 4) * (radius + 4)) return n;
+            if (dx * dx + dy * dy <= (radius + 8) * (radius + 8)) return n;
         }
         return null;
     }
