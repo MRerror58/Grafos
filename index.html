@@ -46,6 +46,50 @@
             <div class="visualizer-container">
                 <canvas id="graph-canvas"></canvas>
 
+                <!-- Tarjeta de información extendida del nodo (Clic derecho) -->
+                <div id="node-context-card" class="node-context-card hidden">
+                    <div class="card-header">
+                        <span class="card-color-dot" id="ctx-node-color"></span>
+                        <h4 id="ctx-node-title">Nodo</h4>
+                        <button id="btn-close-context" class="ctx-close-btn" title="Cerrar">&times;</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">ID interno:</span>
+                            <span class="info-val font-mono" id="ctx-node-id">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Grado total:</span>
+                            <span class="info-val font-mono" id="ctx-node-degree">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Vecinos:</span>
+                            <span class="info-val" id="ctx-node-neighbors">-</span>
+                        </div>
+
+                        <div class="info-row" id = "ctx-directed-info">
+                            <span class="info-label">Entradas (In):</span>
+                            <span class="info-val font-mono" id="ctx-node-inputs">-</span>
+                        </div>
+                        <div class="info-row" id = "ctx-directed-info">
+                            <span class="info-label">Salidas (Out):</span>
+                            <span class="info-val font-mono" id="ctx-node-outputs">-</span>
+                        </div>
+                        <div class="info-row" id = "ctx-weighted-info">
+                            <span class="info-label" id="ctx-node-weight-label">Peso total:</span>
+                            <span class="info-val font-mono" id="ctx-node-weight">-</span>
+                        </div>
+                        <div class="info-row" id = "ctx-weighted-info">
+                            <span class="info-label" id="ctx-node-weight-label-in">Peso de entradas:</span>
+                            <span class="info-val font-mono" id="ctx-node-weight-in">-</span>
+                        </div>
+                        <div class="info-row" id = "ctx-weighted-info">
+                            <span class="info-label" id="ctx-node-weight-label-out">Peso de salidas:</span>
+                            <span class="info-val font-mono" id="ctx-node-weight-out">-</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Empty state -->
                 <div id="canvas-empty-state" class="empty-state">
                     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"

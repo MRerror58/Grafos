@@ -101,3 +101,27 @@ Because of the latest code separation, many code fragments were accidentally rep
 It turns out that in `@contextScopeItemMention` we have several `.js` files containing all page functionality, but I noticed that several of them, because of a previous code split, contain large parts that also exist in another file. These are identical functions with the same lines of code. Unify those parts into one file while keeping everything working correctly from `index.html`.
 
 I mention this because `@contextScopeItemMention` and `@contextScopeItemMention` are almost the same code; they only vary slightly and look like copied lines. Create files that unify those parts so repeated functions are avoided throughout the general code.
+
+
+**Promt 4**
+25/05/2026
+3:45pm
+
+We needed to create a function so that when the user right-clicks, a lot of information about the selected node is displayed. Because of this, I needed to make a prompt to help me with the task. After creating it and carefully reviewing everything made by the AI line by line, we manually modified the code to improve some specific parts and fix issues in the AI-generated code related to the displayed information. Sometimes the information was unnecessary, so we decided to remove details when the node does not have properties such as weight, direction, inputs, or outputs.
+
+Prompt:
+Create a function for the canvas. Remember that ALL functions must be documented the same way as the others so the code can be properly understood and learned from.
+
+This new function must:
+Detect if the user right-clicked on a node.
+If the user right-clicks on empty space, nothing should be displayed.
+If the user right-clicks on a node, extra information about that node must be shown.
+
+The information that must be displayed is:
+
+ID
+Degree
+Neighbors
+Inputs
+Outputs
+Weight
