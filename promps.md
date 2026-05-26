@@ -126,7 +126,7 @@ Inputs
 Outputs
 Weight
 
-**Poromt 4**
+**Promt 5**
 26/05/2026
 3:27pm
 
@@ -135,3 +135,121 @@ Promt:
 
 New section: Button exactly like the graph editing section and its graphing, where a new screen is generated on the page.
 In this new screen you should place a graph selector exactly like the one in the graphing section, but in this case, you must make it so that when selecting it and saying that I want to see it, the ENTIRE graph is displayed EXPLICITLY. Not only the name and the number of nodes, but the connections, the nodes and their IDs, everything exactly, literally and explicitly as they are currently stored in localStorage.
+
+**Promt 6**
+26/05/2026
+5:46pm
+
+This promt was created for the txt traduction in the proyect.
+Promt:
+
+Necesito que me ayudes a implementar la funcionalidad de importar y exportar grafos en archivos .txt para mi proyecto de Matemáticas Discretas II.
+
+Contexto del requisito:
+El proyecto necesita una función que tome como entrada una ruta a un archivo de texto, lo lea, y a partir de los valores inicialice el grafo. El formato base del archivo es:
+
+source,target,weight
+
+El separador es coma ",".
+
+Importante:
+No inventes arquitectura ni nombres de funciones existentes. Primero revisa el proyecto completo y detecta cómo está representado actualmente el grafo, cómo se crean, guardan, editan y eliminan los grafos, y cómo se conectan los botones en la interfaz.
+
+Objetivo principal:
+Implementar importación y exportación de grafos en formato .txt.
+
+Requisitos específicos:
+
+1. Crear o modificar las funciones necesarias en `requirimientos.js`
+   - La función de importar debe estar en `requirimientos.js`.
+   - La función de exportar debe estar en `requirimientos.js`.
+   - Estas funciones deben conectarse con la lógica real del proyecto, sin romper lo existente.
+
+2. Crear un archivo separado llamado `txt.js`
+   - Este archivo debe encargarse únicamente de traducir entre texto y grafo.
+   - Es decir, `txt.js` debe contener la lógica para:
+     - Convertir el contenido de un archivo .txt en una estructura entendible por el grafo.
+     - Convertir un grafo existente en un string con formato txt.
+   - `requirimientos.js` debe usar/importar las funciones de `txt.js`.
+
+3. Formato mínimo obligatorio del TXT:
+   Cada línea debe representar una arista con este formato:
+
+   source,target,weight
+
+   Ejemplo:
+
+   A,B,5
+   B,C,2
+   C,A,7
+
+   Esto debe crear/inicializar un grafo con los vértices y aristas correspondientes.
+
+4. Tener en cuenta diferentes representaciones posibles del grafo en texto
+   Antes de implementar, revisa qué representación usa el proyecto internamente.
+   La solución debe ser adaptable a la representación actual del proyecto, por ejemplo:
+   - Lista de adyacencia
+   - Matriz de adyacencia
+   - Lista de aristas
+   - Objetos/clases existentes del proyecto
+   - Cualquier estructura que ya esté implementada
+
+   No cambies la representación principal del proyecto si no es necesario. Solo traduce desde/hacia ella.
+
+5. Importación
+   - El usuario debe poder seleccionar o cargar un archivo `.txt`.
+   - Validar que el archivo sea `.txt`.
+   - Leer su contenido.
+   - Parsear cada línea usando `source,target,weight`.
+   - Ignorar líneas vacías.
+   - Manejar espacios extra, por ejemplo: `A, B, 5`.
+   - Validar que cada línea tenga exactamente 3 valores.
+   - Validar que `weight` sea numérico.
+   - Inicializar o actualizar el grafo usando la estructura que ya usa el proyecto.
+   - Mostrar un mensaje claro si el archivo tiene errores de formato.
+
+6. Exportación
+   - El usuario debe poder exportar el grafo actual a un archivo `.txt`.
+   - El archivo generado debe tener una línea por cada arista.
+   - El formato debe ser:
+
+   source,target,weight
+
+   - Si el grafo no tiene peso en alguna arista, define una solución coherente con el proyecto:
+     - usar peso 1 por defecto, o
+     - usar el peso guardado si ya existe.
+   - No dupliques aristas innecesariamente si el grafo es no dirigido, salvo que el proyecto represente explícitamente ambas direcciones.
+
+7. Ubicación de botones en la interfaz
+   Agregar dos botones:
+   - Importar grafo .txt
+   - Exportar grafo .txt
+
+   Los botones deben ir en la sección de edición de un grafo, justo debajo de donde actualmente se guarda y se elimina el grafo.
+
+   Antes de editar, busca en el proyecto dónde están los botones de guardar y eliminar grafo, y agrega los nuevos botones ahí.
+
+8. Restricciones importantes
+   - No inventes archivos, componentes ni nombres si ya existen equivalentes.
+   - No rompas la funcionalidad actual de crear, guardar, editar o eliminar grafos.
+   - Mantén nombres de variables y funciones en inglés, porque el enunciado lo exige.
+   - Si encuentras nombres mal escritos como `requirimientos.js`, respeta el nombre real del archivo si ya existe así.
+   - Si el archivo correcto tiene otro nombre parecido, explícame antes de cambiar algo.
+
+9. Entregables esperados
+   - Código funcional para importar grafos desde `.txt`.
+   - Código funcional para exportar grafos a `.txt`.
+   - Archivo `txt.js` separado con las funciones de traducción.
+   - Modificación de `requirimientos.js` para conectar import/export.
+   - Botones agregados en la interfaz en la sección correcta.
+   - Validaciones básicas y mensajes de error claros.
+   - Una explicación breve de qué archivos modificaste y por qué.
+
+10. Antes de modificar
+   Primero analiza el proyecto y dime:
+   - Qué representación de grafo está usando actualmente.
+   - En qué archivo está la lógica principal del grafo.
+   - Dónde están los botones de guardar y eliminar.
+   - Cómo planeas conectar importación/exportación sin romper lo existente.
+
+Luego implementa los cambios.
