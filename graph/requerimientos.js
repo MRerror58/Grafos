@@ -150,6 +150,12 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
      */
     function detectGraphSimplicity(nodes, edges, graphType) {
 
+
+        const n = nodes.length;
+        if (n <= 2) {
+            return true;
+        }
+
         // --- EDGE MEMORY ---
         // Stores previously seen connections
         // so duplicate edges can be detected.
