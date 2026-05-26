@@ -170,10 +170,8 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
             const to = String(edge.to);
 
             // --- CHECK 1: SELF-LOOPS ---
-            // Example: A -> A
-            if (from === to) {
-                return false;
-            }
+            // Example A -> A
+            if (from === to) { return false; }
 
             let edgeKey;
 
@@ -216,8 +214,10 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
         // If no invalid structures were found,
         // the graph is simple.
         return true;
-    }   
- /**
+
+    }    // ===== 3. COMPLETE GRAPH DETECTION =====
+
+    /**
      * Function: detectGraphCompleteness
      * What does it receive?:
      *  - nodes (array): List of node objects in the graph.
@@ -282,7 +282,7 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
             }
 
             // A complete graph cannot contain self-loops.
-            if (from === to) {return false;}
+            if (from === to) { return false; }
 
             // Build a normalized edge key.
             let edgeKey;
@@ -349,12 +349,131 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
         // If every required connection exists, the graph is complete.
         return 'Complete graph';
     }
+
+    // ===== 4. TXT IMPORT / EXPORT =====
+
+    /**
+     * Function: initTxtEvents
+     * What does it do?: Connects the import and export buttons to their corresponding logic.
+     * What does it return?: Nothing.
+     */
+    function initTxtEvents() {
+        const importBtn = document.getElementById('btn-import-txt');
+        const exportBtn = document.getElementById('btn-export-txt');
+        const fileInput = document.getElementById('import-txt-input');
+
+        if (importBtn && fileInput) {
+            importBtn.addEventListener('click', () => {
+                fileInput.value = ''; // Reset file input so selecting the same file fires change event
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validate that the file is a .txt
+                if (!file.name.endsWith('.txt')) {
+                    showToast('El archivo seleccionado debe ser un archivo de texto (.txt)', 'error');
+                    return;
+                }
+
+                importGraphFromTxt(file);
+            });
+        }
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                exportGraphToTxt();
+            });
+        }
+    }
+
+    /**
+     * Function: importGraphFromTxt
+     * What does it receive?: A file object.
+     * What does it do?: Reads the file, parses it using TxtTranslator, and loads it into the Editor.
+     */
+    function importGraphFromTxt(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const textContent = e.target.result;
+            try {
+                // Get the current configuration from the editor form to decide type/weighted.
+                const currentType = document.getElementById('graph-type').value || 'undirected';
+                const currentWeighted = document.getElementById('graph-weighted').value === 'yes';
+
+                // Get graph name from file name (without extension)
+                const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'Grafo Importado';
+
+                // Call TxtTranslator to parse the TXT content
+                const parsedGraph = TxtTranslator.parseTxtToGraph(textContent, currentType, currentWeighted, baseName);
+
+                // Load the parsed graph object into the Editor
+                Editor.loadGraphObject(parsedGraph);
+
+                showToast(`Grafo "${parsedGraph.name}" importado exitosamente`, 'success');
+            } catch (err) {
+                // Show a clear validation error to the user
+                showToast(err.message, 'error');
+            }
+        };
+
+        reader.onerror = () => {
+            showToast('Error al leer el archivo seleccionado.', 'error');
+        };
+
+        reader.readAsText(file);
+    }
+
+    /**
+     * Function: exportGraphToTxt
+     * What does it do?: Retrieves the current graph being edited from Editor, converts it to TXT format,
+     * and downloads it to the user's computer.
+     */
+    function exportGraphToTxt() {
+        // Retrieve current graph from Editor
+        const currentGraph = Editor.getCurrentGraph();
+        if (!currentGraph || currentGraph.nodes.length === 0) {
+            showToast('No hay nodos en el grafo actual para exportar.', 'error');
+            return;
+        }
+
+        try {
+            // Call TxtTranslator to convert graph to TXT format
+            const txtContent = TxtTranslator.exportGraphToTxt(currentGraph);
+
+            // Trigger file download
+            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            // Clean up the name or use default
+            const fileName = (currentGraph.name.trim() || 'grafo').replace(/[^a-z0-9_-]/gi, '_') + '.txt';
+            link.download = fileName;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(url);
+            showToast('Grafo exportado exitosamente.', 'success');
+        } catch (err) {
+            showToast('Error al exportar el grafo.', 'error');
+        }
+    }
+
     // Expose public functions for other modules to use.
     return {
         searchAndFocusNode,
         initSearchEvents,
         detectGraphSimplicity,
-        detectGraphCompleteness
+        detectGraphCompleteness,
+        initTxtEvents,
+        importGraphFromTxt,
+        exportGraphToTxt
     };
 })();
 

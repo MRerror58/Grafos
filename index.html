@@ -51,7 +51,8 @@
                 <div id="node-search-box" class="node-search-box hidden">
                     <input type="text" id="search-node-input" class="input-control" placeholder="Buscar nodo...">
                     <button id="btn-search-node" class="btn-icon" title="Buscar nodo">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <circle cx="11" cy="11" r="8" />
                             <line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg>
@@ -75,28 +76,28 @@
                             <span class="info-label">Grado total:</span>
                             <span class="info-val font-mono" id="ctx-node-degree">-</span>
                         </div>
-                        <div class="info-row" id = "ctx-node-neighbors-row">
+                        <div class="info-row" id="ctx-node-neighbors-row">
                             <span class="info-label">Vecinos:</span>
                             <span class="info-val" id="ctx-node-neighbors">-</span>
                         </div>
 
-                        <div class="info-row" id = "ctx-directed-info">
+                        <div class="info-row" id="ctx-directed-info">
                             <span class="info-label">Entradas (In):</span>
                             <span class="info-val font-mono" id="ctx-node-inputs">-</span>
                         </div>
-                        <div class="info-row" id = "ctx-directed-info">
+                        <div class="info-row" id="ctx-directed-info">
                             <span class="info-label">Salidas (Out):</span>
                             <span class="info-val font-mono" id="ctx-node-outputs">-</span>
                         </div>
-                        <div class="info-row" id = "ctx-weighted-info">
+                        <div class="info-row" id="ctx-weighted-info">
                             <span class="info-label" id="ctx-node-weight-label">Peso total:</span>
                             <span class="info-val font-mono" id="ctx-node-weight">-</span>
                         </div>
-                        <div class="info-row" id = "ctx-weighted-info">
+                        <div class="info-row" id="ctx-weighted-info">
                             <span class="info-label" id="ctx-node-weight-label-in">Peso de entradas:</span>
                             <span class="info-val font-mono" id="ctx-node-weight-in">-</span>
                         </div>
-                        <div class="info-row" id = "ctx-weighted-info">
+                        <div class="info-row" id="ctx-weighted-info">
                             <span class="info-label" id="ctx-node-weight-label-out">Peso de salidas:</span>
                             <span class="info-val font-mono" id="ctx-node-weight-out">-</span>
                         </div>
@@ -240,7 +241,8 @@
                         <line x1="16" y1="17" x2="8" y2="17" />
                     </svg>
                     <h2>Sin datos mostrados</h2>
-                    <p>Elige un grafo guardado y pulsa <strong>Ver grafo</strong> para ver toda su información en localStorage.</p>
+                    <p>Elige un grafo guardado y pulsa <strong>Ver grafo</strong> para ver toda su información en
+                        localStorage.</p>
                 </div>
 
                 <div id="explicit-content" class="hidden">
@@ -253,7 +255,8 @@
                         <h2 class="explicit-section-title">
                             Nodos <span class="explicit-count">(<span id="explicit-nodes-count">0</span>)</span>
                         </h2>
-                        <p class="explicit-section-desc">Cada nodo con todas sus propiedades guardadas (id, label, color, etc.).</p>
+                        <p class="explicit-section-desc">Cada nodo con todas sus propiedades guardadas (id, label,
+                            color, etc.).</p>
                         <div id="explicit-nodes-list" class="explicit-cards-grid"></div>
                     </section>
 
@@ -261,7 +264,8 @@
                         <h2 class="explicit-section-title">
                             Aristas <span class="explicit-count">(<span id="explicit-edges-count">0</span>)</span>
                         </h2>
-                        <p class="explicit-section-desc">Cada arista con from, to, weight y cualquier otro campo almacenado.</p>
+                        <p class="explicit-section-desc">Cada arista con from, to, weight y cualquier otro campo
+                            almacenado.</p>
                         <div id="explicit-edges-list" class="explicit-cards-grid"></div>
                     </section>
 
@@ -419,6 +423,27 @@
                                 Limpiar
                             </button>
                         </div>
+                        <div class="form-row" style="margin-top: 10px;">
+                            <button id="btn-import-txt" class="btn btn-ghost btn-block">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                Importar .txt
+                            </button>
+                            <button id="btn-export-txt" class="btn btn-ghost btn-block">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Exportar .txt
+                            </button>
+                            <input type="file" id="import-txt-input" accept=".txt" style="display: none;">
+                        </div>
                     </div>
                 </div>
 
@@ -506,6 +531,7 @@
     <script src="graph/canvas.js"></script>
     <script src="graph/storage/storage.js"></script>
     <script src="graph/ui/sidebar.js"></script>
+    <script src="graph/txt.js"></script>
     <script src="graph/requerimientos.js"></script>
     <script src="graph/visualizer.js"></script>
     <script src="graph/editor.js"></script>

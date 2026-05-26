@@ -29,6 +29,9 @@ const Editor = (() => {
         bindEvents();
         loadSavedGraphsList();
         updatePreview();
+
+        // Initialize TXT file import/export handlers from Requerimientos module
+        Requerimientos.initTxtEvents();
     }
 
     /**
@@ -45,14 +48,14 @@ const Editor = (() => {
         document.getElementById('btn-clear-form').addEventListener('click', clearForm);
 
         // The 'change' event runs when a select menu changes value.
-        document.getElementById('graph-weighted').addEventListener('change', function() {
+        document.getElementById('graph-weighted').addEventListener('change', function () {
             currentGraph.weighted = this.value === 'yes';
             // Modifies CSS directly with JS (.style.display).
             document.getElementById('weight-group').style.display = this.value === 'yes' ? 'flex' : 'none';
         });
 
         // Event for directed/undirected graph type changes.
-        document.getElementById('graph-type').addEventListener('change', function() {
+        document.getElementById('graph-type').addEventListener('change', function () {
             currentGraph.type = this.value;
             updatePreview();
         });
@@ -368,6 +371,54 @@ const Editor = (() => {
         updatePreview();
     }
 
+    /**
+     * Function: loadGraphObject
+     * What does it receive?: A graph object.
+     * What does it do?: Loads a graph object directly into currentGraph, sets the ID counter,
+     * fills the form controls, and repaints the screen.
+     */
+    function loadGraphObject(graph) {
+        if (!graph) return;
+
+        currentGraph = {
+            name: graph.name || '',
+            type: graph.type || 'undirected',
+            weighted: graph.weighted || false,
+            nodes: [...graph.nodes],
+            edges: [...graph.edges]
+        };
+
+        // Fills the HTML controls with the new values.
+        document.getElementById('graph-name').value = currentGraph.name;
+        document.getElementById('graph-type').value = currentGraph.type;
+        document.getElementById('graph-weighted').value = currentGraph.weighted ? 'yes' : 'no';
+        document.getElementById('weight-group').style.display = currentGraph.weighted ? 'flex' : 'none';
+
+        // Reset and recalculate ID counter.
+        nodeIdCounter = 0;
+        currentGraph.nodes.forEach(n => {
+            const num = parseInt(n.id.replace('n', ''));
+            if (num > nodeIdCounter) nodeIdCounter = num;
+        });
+
+        // Repaints the screen.
+        updateNodeSelectors();
+        updateNodesList();
+        updateEdgesList();
+        updateSummary();
+        updatePreview();
+    }
+
+    /**
+     * Function: getCurrentGraph
+     * What does it do?: Returns the graph currently being edited in the editor.
+     * What does it return?: The currentGraph object.
+     */
+    function getCurrentGraph() {
+        return currentGraph;
+    }
+
+
     // ===== INTERFACE UPDATES (UI) =====
 
     /**
@@ -548,7 +599,8 @@ const Editor = (() => {
     return {
         init, addNode, removeNode, addEdge, removeEdge,
         saveGraph, deleteGraph, loadGraphToEditor, clearForm,
-        visualizeGraph, refreshVisualizerSelector
+        visualizeGraph, refreshVisualizerSelector,
+        loadGraphObject, getCurrentGraph
     };
 })();
 
