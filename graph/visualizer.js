@@ -671,14 +671,28 @@ const Visualizer = (() => {
         // --- 7. UPDATE HTML CARD ELEMENTS ---
         document.getElementById('ctx-node-title').textContent = `Nodo ${node.label}`;
         document.getElementById('ctx-node-id').textContent = node.id;
-        document.getElementById('ctx-node-degree').textContent = degree;
-        document.getElementById('ctx-node-neighbors').textContent = neighborsText;
+        if (degree === 0) {
+            document.getElementById('ctx-node-degree-row').style.display = 'none';
+        } else {
+            document.getElementById('ctx-node-degree-row').style.display = 'flex';
+            document.getElementById('ctx-node-degree').textContent = degree;
+        }
+        if (neighborLabels.length > 0) {
+            document.getElementById('ctx-node-neighbors-row').style.display = 'flex';
+            document.getElementById('ctx-node-neighbors').textContent = neighborsText;
+        } else {
+            document.getElementById('ctx-node-neighbors-row').style.display = 'none';
+        }
         if (isDirected) {
-            document.getElementById('ctx-directed-info').style.display = 'flex';
+            document.querySelectorAll('#ctx-directed-info').forEach(element => {
+                element.style.display = 'flex';
+            });
             document.getElementById('ctx-node-inputs').textContent = inputsText;
             document.getElementById('ctx-node-outputs').textContent = outputsText;
         } else {
-            document.getElementById('ctx-directed-info').style.display = 'none';
+            document.querySelectorAll('#ctx-directed-info').forEach(element => {
+                element.style.display = 'none';
+            });
         }
         if (isWeighted) {
             document.querySelectorAll('#ctx-weighted-info').forEach(element => {
