@@ -148,7 +148,7 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
      *  - A simple graph has no self-loops and no parallel edges.
      *  - A multigraph allows self-loops or parallel edges (or both).
      */
-    function detectGraphSimplicity(graph) {//note: that define if the graph is simple or not.
+    function detectGraphSimplicity(nodes, edges, graphType) {
 
         // --- EDGE MEMORY ---
         // Stores previously seen connections
@@ -156,7 +156,7 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
         const seenEdges = new Set();
 
         // --- SCAN EVERY EDGE ---
-        for (const edge of graph.edges) {
+        for (const edge of edges) {
             //basic definition
             const from = String(edge.from);
             const to = String(edge.to);
@@ -167,7 +167,7 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
 
             let edgeKey;
             // --- DIRECTED GRAPH ---
-            if (graph.type === 'directed') {
+            if (graphType === 'directed') {
 
                 // Direction matters:
                 // A->B != B->A
@@ -242,76 +242,103 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
      *    vertices is connected by exactly one edge.
      */
     function detectGraphCompleteness(nodes, edges, graphType) {
+
         const n = nodes.length;
 
-        // --- STEP 1: BASIC VALIDATION ---
-        // A graph with 0 or 1 nodes is trivially complete (no pairs to check).
+        // --- STEP 1: TRIVIAL CASES ---
+        // A graph with 0 or 1 node is trivially complete.
         if (n <= 1) {
-            return 'Complete graph';
+            return true;
         }
 
-        // --- STEP 2: REJECT INVALID STRUCTURES (SELF-LOOPS & PARALLEL EDGES) ---
-        // A complete graph CANNOT contain self-loops or parallel edges.
-        let hasSelfLoop = false;
-        let hasParallelEdges = false;
+        // --- STEP 3: COLLECT NODE IDS ---
+        // We store all valid node IDs in a Set for fast lookup.
+        const nodeIds = new Set();
+        for (const node of nodes) {
+            nodeIds.add(String(node.id));
+        }
+
+        // --- STEP 4: SCAN EDGES AND CHECK BASIC VALIDITY ---
+        // We use a Set to detect duplicate edges.
         const seenEdges = new Set();
 
-        for (const e of edges) {
-            // Check for self-loops.
-            if (e.from === e.to) {
-                hasSelfLoop = true;
+        for (const edge of edges) {
+            const from = String(edge.from);
+            const to = String(edge.to);
+
+            // An edge must connect existing nodes only.
+            if (!nodeIds.has(from) || !nodeIds.has(to)) {
+                return false;
             }
 
-            // Create a unique key for this edge to detect duplicates.
-            let key;
+            // A complete graph cannot contain self-loops.
+            if (from === to) {return false;}
+
+            // Build a normalized edge key.
+            let edgeKey;
+
             if (graphType === 'directed') {
-                // In directed graphs, A->B and B->A are DIFFERENT.
-                key = `${e.from}->${e.to}`;
+                // In directed graphs, direction matters.
+                // A->B and B->A are different edges.
+                edgeKey = `${from}->${to}`;
             } else {
-                // In undirected graphs, A-B and B-A are the SAME.
-                // Normalize by converting to strings and comparing lexicographically.
-                const a = String(e.from);
-                const b = String(e.to);
-                key = a < b ? `${a}-${b}` : `${b}-${a}`;
+                // In undirected graphs, direction does not matter.
+                // A-B and B-A must generate the same key.
+                if (from < to) {// Note: javascript can detect the minor and major string per alphabetic. XD, crazy
+                    edgeKey = `${from}-${to}`;
+                } else {
+                    edgeKey = `${to}-${from}`;
+                }
             }
 
-            // Check for parallel edges (duplicate connections).
-            if (seenEdges.has(key)) {
-                hasParallelEdges = true;
+            // Duplicate edge = parallel edge = not complete.
+            if (seenEdges.has(edgeKey)) {
+                return false;
             }
-            seenEdges.add(key);
+
+            seenEdges.add(edgeKey);
         }
 
-        // If self-loops or parallel edges exist, the graph is NOT complete.
-        if (hasSelfLoop || hasParallelEdges) {
-            return 'Not complete graph';
-        }
+        // --- STEP 5: VERIFY ALL REQUIRED CONNECTIONS ---
+        // Count-based checks are not enough.
+        // We must confirm that every required pair actually exists.
 
-        // --- STEP 3 & 4: COUNT UNIQUE EDGES & COMPARE AGAINST EXPECTED COUNT ---
-        // We already tracked all unique edges in seenEdges.
-        // Now calculate the expected count for a complete graph.
+        const ids = [...nodeIds];
 
-        let expectedEdges;
         if (graphType === 'directed') {
-            // For directed graphs: every ordered pair of distinct nodes needs an edge.
-            // Formula: n * (n - 1)
-            // Example: 3 nodes (A, B, C) → A->B, A->C, B->A, B->C, C->A, C->B = 6 edges
-            expectedEdges = n * (n - 1);
+            // Every ordered pair of distinct nodes must exist.
+            for (const from of ids) {
+                for (const to of ids) {
+                    if (from === to) {
+                        continue;
+                    }
+
+                    const requiredKey = `${from}->${to}`;
+
+                    if (!seenEdges.has(requiredKey)) {
+                        return false;
+                    }
+                }
+            }
         } else {
-            // For undirected graphs: every unordered pair of distinct nodes needs an edge.
-            // Formula: n * (n - 1) / 2
-            // Example: 3 nodes (A, B, C) → A-B, A-C, B-C = 3 edges
-            expectedEdges = n * (n - 1) / 2;
+            // Every unordered pair of distinct nodes must exist.
+            for (let i = 0; i < ids.length; i++) {
+                for (let j = i + 1; j < ids.length; j++) {
+                    const a = ids[i];
+                    const b = ids[j];
+
+                    const requiredKey = a < b ? `${a}-${b}` : `${b}-${a}`;
+
+                    if (!seenEdges.has(requiredKey)) {
+                        return false;
+                    }
+                }
+            }
         }
 
-        // Compare actual vs. expected edge count.
-        if (seenEdges.size === expectedEdges) {
-            return 'Complete graph';
-        } else {
-            return 'Not complete graph';
-        }
+        // If every required connection exists, the graph is complete.
+        return 'Complete graph';
     }
-
     // Expose public functions for other modules to use.
     return {
         searchAndFocusNode,
