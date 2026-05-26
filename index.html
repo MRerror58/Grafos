@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/visualizador.css">
     <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/explicit.css">
     <link rel="stylesheet" href="css/componentes.css">
 </head>
 
@@ -45,6 +46,18 @@
 
             <div class="visualizer-container">
                 <canvas id="graph-canvas"></canvas>
+
+                <!-- Node search box (top-left, shown when a graph is loaded) -->
+                <div id="node-search-box" class="node-search-box hidden">
+                    <input type="text" id="search-node-input" class="input-control" placeholder="Buscar nodo...">
+                    <button id="btn-search-node" class="btn-icon" title="Buscar nodo">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </button>
+                </div>
+
 
                 <!-- Tarjeta de información extendida del nodo (Clic derecho) -->
                 <div id="node-context-card" class="node-context-card hidden">
@@ -153,23 +166,116 @@
                     </button>
                 </div>
 
-                <!-- Info panel -->
-                <div id="graph-info-panel" class="info-panel hidden">
-                    <h3 id="info-graph-name">—</h3>
-                    <div class="info-stats">
-                        <div class="stat">
-                            <span class="stat-value" id="info-nodes">0</span>
-                            <span class="stat-label">Nodos</span>
+                <!-- Graph info stack (small validation panel above the main panel) -->
+                <div id="graph-info-stack" class="graph-info-stack hidden">
+                    <!-- Small panel: left label + ": " and right "Cumple/No cumple" -->
+                    <div id="graph-validation-panel" class="validation-panel">
+                        <div class="validation-row">
+                            <span class="validation-left">
+                                <span class="validation-label">Dirigido</span><span class="validation-colon">: </span>
+                            </span>
+                            <span class="validation-right font-mono" id="val-directed-result">—</span>
                         </div>
-                        <div class="stat">
-                            <span class="stat-value" id="info-edges">0</span>
-                            <span class="stat-label">Aristas</span>
+                        <div class="validation-row">
+                            <span class="validation-left">
+                                <span class="validation-label">Simple</span><span class="validation-colon">: </span>
+                            </span>
+                            <span class="validation-right font-mono" id="val-simple-result">—</span>
                         </div>
-                        <div class="stat">
-                            <span class="stat-value" id="info-type">—</span>
-                            <span class="stat-label">Tipo</span>
+                        <div class="validation-row">
+                            <span class="validation-left">
+                                <span class="validation-label">Completo</span><span class="validation-colon">: </span>
+                            </span>
+                            <span class="validation-right font-mono" id="val-complete-result">—</span>
                         </div>
                     </div>
+
+                    <!-- Main panel: only compact stats -->
+                    <div id="graph-info-panel" class="info-panel">
+                        <h3 id="info-graph-name">—</h3>
+                        <div class="info-stats">
+                            <div class="stat">
+                                <span class="stat-value" id="info-nodes">0</span>
+                                <span class="stat-label">Nodos</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="info-edges">0</span>
+                                <span class="stat-label">Aristas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE: EXPLICIT VIEW (full localStorage data) ==================== -->
+        <section id="page-explicit" class="page">
+            <div class="page-header">
+                <div class="page-title-group">
+                    <h1>Vista explícita del grafo</h1>
+                    <p class="page-subtitle">Consulta nodos, aristas, IDs y conexiones tal como están guardados</p>
+                </div>
+                <div class="page-actions">
+                    <select id="explicit-graph-selector" class="select-control">
+                        <option value="">— Seleccionar grafo —</option>
+                    </select>
+                    <button id="btn-show-explicit-graph" class="btn btn-primary" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Ver grafo
+                    </button>
+                </div>
+            </div>
+
+            <div class="explicit-layout">
+                <div id="explicit-empty" class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
+                        opacity="0.3">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    <h2>Sin datos mostrados</h2>
+                    <p>Elige un grafo guardado y pulsa <strong>Ver grafo</strong> para ver toda su información en localStorage.</p>
+                </div>
+
+                <div id="explicit-content" class="hidden">
+                    <section class="explicit-section">
+                        <h2 class="explicit-section-title">Datos generales del grafo</h2>
+                        <div id="explicit-metadata" class="explicit-meta-grid"></div>
+                    </section>
+
+                    <section class="explicit-section">
+                        <h2 class="explicit-section-title">
+                            Nodos <span class="explicit-count">(<span id="explicit-nodes-count">0</span>)</span>
+                        </h2>
+                        <p class="explicit-section-desc">Cada nodo con todas sus propiedades guardadas (id, label, color, etc.).</p>
+                        <div id="explicit-nodes-list" class="explicit-cards-grid"></div>
+                    </section>
+
+                    <section class="explicit-section">
+                        <h2 class="explicit-section-title">
+                            Aristas <span class="explicit-count">(<span id="explicit-edges-count">0</span>)</span>
+                        </h2>
+                        <p class="explicit-section-desc">Cada arista con from, to, weight y cualquier otro campo almacenado.</p>
+                        <div id="explicit-edges-list" class="explicit-cards-grid"></div>
+                    </section>
+
+                    <section class="explicit-section">
+                        <h2 class="explicit-section-title">Lista de conexiones</h2>
+                        <p class="explicit-section-desc">Relaciones explícitas entre IDs y etiquetas de nodos.</p>
+                        <div id="explicit-connections-list"></div>
+                    </section>
+
+                    <section class="explicit-section">
+                        <h2 class="explicit-section-title">JSON completo en localStorage</h2>
+                        <p class="explicit-section-desc">Representación literal del objeto guardado (copia exacta).</p>
+                        <pre id="explicit-json" class="explicit-json-block"></pre>
+                    </section>
                 </div>
             </div>
         </section>
@@ -400,8 +506,10 @@
     <script src="graph/canvas.js"></script>
     <script src="graph/storage/storage.js"></script>
     <script src="graph/ui/sidebar.js"></script>
+    <script src="graph/requerimientos.js"></script>
     <script src="graph/visualizer.js"></script>
     <script src="graph/editor.js"></script>
+    <script src="graph/explicit-view.js"></script>
     <script src="main.js"></script>
 </body>
 

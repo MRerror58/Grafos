@@ -22,7 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initializes the editor module.
     Editor.init(); // Function defined in: graph/editor.js
 
-    // Fills the dropdown with saved graphs.
+    // Initializes the explicit localStorage view page.
+    ExplicitView.init(); // Function defined in: graph/explicit-view.js
+
+    // Fills the dropdowns with saved graphs.
     Editor.refreshVisualizerSelector(); // Function defined in: graph/editor.js
 
     // Gets direct references to interactive HTML elements.

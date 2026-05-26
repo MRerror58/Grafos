@@ -822,7 +822,7 @@ body {
 /* ===== TOAST ===== */
 #toast-container {
     position: fixed;
-    bottom: 24px;
+    top: 24px; /* NO MOIFICAR, DEBE ESTAR EN EL TOP*/
     right: 24px;
     display: flex;
     flex-direction: column;

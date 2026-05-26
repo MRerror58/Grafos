@@ -47,6 +47,9 @@ const Visualizer = (() => {
 
         bindCanvasEvents();
         bindControlEvents();
+
+        // Initialize search box events from requerimientos.js
+        Requerimientos.initSearchEvents();
     }
 
     /**
@@ -458,14 +461,32 @@ const Visualizer = (() => {
         // Updates information labels in the floating panel.
         document.getElementById('canvas-empty-state').classList.add('hidden');
         document.getElementById('canvas-controls').classList.remove('hidden');
-        document.getElementById('graph-info-panel').classList.remove('hidden');
+        document.getElementById('graph-info-stack').classList.remove('hidden');
         document.getElementById('info-graph-name').textContent = data.name;
         document.getElementById('info-nodes').textContent = nodes.length;
         document.getElementById('info-edges').textContent = edges.length;
-        // Ternary operators create labels such as "Dirigido - Ponderado".
-        document.getElementById('info-type').textContent =
-            (data.type === 'directed' ? 'Dirigido' : 'No dirigido') +
-            (data.weighted ? ' - Ponderado' : '');
+
+        // --- Show the search box ---
+        document.getElementById('node-search-box').classList.remove('hidden');
+        // Clear previous search text.
+        document.getElementById('search-node-input').value = '';
+
+        // --- Run graph classification functions from requerimientos.js ---
+        // Detect if the graph is Simple or Multigraph.
+        // Returns: true = NOT simple (multigraph), false = simple graph.
+        const isNotSimple = Requerimientos.detectGraphSimplicity(nodes, edges, data.type);
+        const isSimple = !isNotSimple;
+        document.getElementById('val-simple-result').textContent = isSimple ? '✓' : 'x';
+
+        // Detect if the graph is Complete or Not complete.
+        // Returns: "Complete graph" or "Not complete graph".
+        const completeness = Requerimientos.detectGraphCompleteness(nodes, edges, data.type);
+        const isComplete = completeness === 'Complete graph';
+        document.getElementById('val-complete-result').textContent = isComplete ? '✓' : 'x';
+
+        // Directed / Not directed (stored as a Yes/No style "✓/x").
+        const isDirected = data.type === 'directed';
+        document.getElementById('val-directed-result').textContent = isDirected ? '✓' : 'x';
 
         // Resets the camera.
         scale = 1;
@@ -493,7 +514,11 @@ const Visualizer = (() => {
 
         document.getElementById('canvas-empty-state').classList.remove('hidden');
         document.getElementById('canvas-controls').classList.add('hidden');
-        document.getElementById('graph-info-panel').classList.add('hidden');
+        document.getElementById('graph-info-stack').classList.add('hidden');
+
+        // Hide the search box and clear its input.
+        document.getElementById('node-search-box').classList.add('hidden');
+        document.getElementById('search-node-input').value = '';
     }
 
     /**
@@ -755,8 +780,44 @@ const Visualizer = (() => {
         }
     }
 
+    /**
+     * Function: getState
+     * What does it do?: Returns a read-only snapshot of the Visualizer's internal state.
+     * Why does it exist?: So external modules like requerimientos.js can access nodes,
+     * edges, camera position, and canvas without breaking encapsulation.
+     * What does it return?: An object with references to the current internal variables.
+     */
+    function getState() {
+        return {
+            nodes,
+            edges,
+            graphData,
+            canvas,
+            offsetX,
+            offsetY,
+            scale
+        };
+    }
+
+    /**
+     * Function: setCamera
+     * What does it receive?:
+     *  - newOffsetX (number): New horizontal camera offset.
+     *  - newOffsetY (number): New vertical camera offset.
+     *  - newScale (number): New zoom level.
+     * What does it do?: Moves the camera to the given position and redraws.
+     * Why does it exist?: So the search function can center the view on a node.
+     * What does it return?: Nothing.
+     */
+    function setCamera(newOffsetX, newOffsetY, newScale) {
+        offsetX = newOffsetX;
+        offsetY = newOffsetY;
+        scale = newScale;
+        render();
+    }
+
     // Returns the public methods that app files need to invoke.
-    return { init, resize, loadGraph, clear, renderPreview };
+    return { init, resize, loadGraph, clear, renderPreview, getState, setCamera, showNodeDetails };
 })();
 
 // Exposes the module for classic browser scripts.

@@ -52,9 +52,6 @@
 
 /* --- Loaded graph information panel --- */
 .info-panel {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -181,4 +178,81 @@
 .node-context-card .font-mono {
     font-family: var(--font-mono);
     font-size: 11px;
+}
+
+/* --- Node search box (top-left floating panel) --- */
+.node-search-box {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 6px 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 20;
+}
+
+.node-search-box .input-control {
+    width: 160px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* --- Wrap the info-stats so they flow to multiple rows when there are many stats --- */
+.info-stats {
+    flex-wrap: wrap;
+}
+
+/* --- Graph info stack (small validation panel above) --- */
+.graph-info-stack {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+/* --- Small validation panel: left label + ": " and right "Cumple/No cumple" --- */
+.validation-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    box-shadow: var(--shadow-md);
+    min-width: 220px;
+}
+
+.validation-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+}
+
+.validation-left {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.validation-colon {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.validation-right {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: right;
 }

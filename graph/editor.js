@@ -539,6 +539,9 @@ const Editor = (() => {
 
         selector.innerHTML = '<option value="">- Seleccionar grafo -</option>' +
             saved.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+
+        // Keep the explicit-view page selector in sync after save/delete.
+        ExplicitView.refreshSelector(); // Function defined in: graph/explicit-view.js
     }
 
     // The final object defines which methods other files can call.

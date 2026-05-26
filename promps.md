@@ -125,3 +125,13 @@ Neighbors
 Inputs
 Outputs
 Weight
+
+**Poromt 4**
+26/05/2026
+3:27pm
+
+This prot was created because we did need to see the explicit info of the gapsh in the code
+Promt:
+
+APartado nuevo: Boton exactamente igual a la seccion de edicion de grafos y su graficion donde se genera una pantalla nueva en la pagina.
+En esta pantalla nueva debes ubicar un selector de grafos exacamente igual al de la graficion, pero, en este caso, debes hacer que al seleccionarle y decir que lo quiero ver, debe salr representado TODO el grafo EXPLICITAMENTE. no solo el nombre y la cantidad nodos, si no las coneccions, los nods y sus IDs, todo, tal cual, literal y explicitamente como se encuentrna actualmente uardados en el localstorage.

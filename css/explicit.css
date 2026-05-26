@@ -1,0 +1,167 @@
+/* =============================================================
+   EXPLICIT.CSS - Page to show full graph data from localStorage
+   ============================================================= */
+
+.explicit-layout {
+    flex: 1;
+    padding: 24px 32px 48px;
+    overflow-y: auto;
+}
+
+.explicit-section {
+    margin-bottom: 28px;
+}
+
+.explicit-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.explicit-section-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: -8px 0 12px;
+    line-height: 1.5;
+}
+
+.explicit-meta-grid {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.explicit-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 13px;
+}
+
+.explicit-meta-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    min-width: 180px;
+}
+
+.explicit-meta-value {
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.explicit-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.explicit-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+}
+
+.explicit-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.explicit-connection-line {
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.explicit-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.explicit-prop-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+}
+
+.explicit-prop-key {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.explicit-prop-val {
+    color: var(--text-primary);
+    text-align: right;
+    word-break: break-all;
+}
+
+.explicit-connections-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.explicit-connections-li {
+    font-size: 12px;
+    padding: 8px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.explicit-conn-index {
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.explicit-json-block {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    overflow-x: auto;
+    max-height: 420px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+.explicit-empty-msg {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.explicit-layout > .empty-state {
+    padding: 64px 24px;
+}
+
+.explicit-count {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
