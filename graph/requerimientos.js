@@ -148,72 +148,76 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
      *  - A simple graph has no self-loops and no parallel edges.
      *  - A multigraph allows self-loops or parallel edges (or both).
      */
-    function detectGraphSimplicity(nodes, edges, graphType) {
+    function detectGraphSimplicity(graph) {
 
+        const nodes = graph.nodes;
+        const edges = graph.edges;
+        const graphType = graph.type;
 
-        const n = nodes.length;
-        if (n <= 2) {
-            return true;
+        // --- BASIC VALIDATION ---
+        if (!Array.isArray(nodes) || !Array.isArray(edges)) {
+            return false;
         }
 
         // --- EDGE MEMORY ---
-        // Stores previously seen connections
-        // so duplicate edges can be detected.
+        // Stores each edge already seen, so duplicates can be detected.
         const seenEdges = new Set();
 
         // --- SCAN EVERY EDGE ---
         for (const edge of edges) {
-            //basic definition
+
             const from = String(edge.from);
             const to = String(edge.to);
 
             // --- CHECK 1: SELF-LOOPS ---
-            // Example A -> A
-            if (from === to) {return false;}
+            // Example: A -> A
+            if (from === to) {
+                return false;
+            }
 
             let edgeKey;
+
             // --- DIRECTED GRAPH ---
             if (graphType === 'directed') {
 
-                // Direction matters:
-                // A->B != B->A
+                // In directed graphs, direction matters.
+                // A->B and B->A are different edges.
                 edgeKey = `${from}->${to}`;
 
             }
-            // --- UNDIRECTED GRAPH ---
-            else {
 
-                // Direction does NOT matter:
-                // A-B == B-A
-                //
-                // Normalize the order so both
-                // representations generate
-                // the exact same key.
-                if (from < to) {// Note: javascript can detect the minor and major string per alphabetic. XD, crazy
-                    edgeKey = `${from}-${to}`;
-                } else {
-                    edgeKey = `${to}-${from}`;
-                }
+            // --- UNDIRECTED GRAPH ---
+            else if (graphType === 'undirected') {
+
+                // In undirected graphs, direction does not matter.
+                // A-B and B-A must generate the same key.
+                edgeKey =
+                    from < to
+                        ? `${from}-${to}`
+                        : `${to}-${from}`;
+            }
+
+            // --- INVALID GRAPH TYPE ---
+            else {
+                return false;
             }
 
             // --- CHECK 2: PARALLEL EDGES ---
-            // If this connection already exists,
-            // the graph is NOT simple.
+            // If the same connection already exists,
+            // the graph is not simple.
             if (seenEdges.has(edgeKey)) {
                 return false;
             }
 
-            // Store the connection for future checks.
+            // Store this edge for future comparisons.
             seenEdges.add(edgeKey);
-    }
+        }
 
-    // If no invalid structures were found,
-    // the graph is simple.
-    return true;
-
-    }    // ===== 3. COMPLETE GRAPH DETECTION =====
-
-    /**
+        // If no invalid structures were found,
+        // the graph is simple.
+        return true;
+    }   
+ /**
      * Function: detectGraphCompleteness
      * What does it receive?:
      *  - nodes (array): List of node objects in the graph.
