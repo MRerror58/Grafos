@@ -150,61 +150,55 @@ const Requerimientos = (() => { //Note: this search the nothe what u wrote.
      */
     function detectGraphSimplicity(graph) {//note: that define if the graph is simple or not.
 
-    // --- EDGE MEMORY ---
-    // Stores previously seen connections
-    // so duplicate edges can be detected.
-    const seenEdges = new Set();
+        // --- EDGE MEMORY ---
+        // Stores previously seen connections
+        // so duplicate edges can be detected.
+        const seenEdges = new Set();
 
-    // --- SCAN EVERY EDGE ---
-    for (const edge of graph.edges) {
+        // --- SCAN EVERY EDGE ---
+        for (const edge of graph.edges) {
+            //basic definition
+            const from = String(edge.from);
+            const to = String(edge.to);
 
-        // Convert IDs to strings to ensure
-        // consistent comparison behavior.
-        const from = String(edge.from);
-        const to = String(edge.to);
+            // --- CHECK 1: SELF-LOOPS ---
+            // Example A -> A
+            if (from === to) {return false;}
 
-        // --- CHECK 1: SELF-LOOPS ---
-        // Example:
-        // A -> A
-        if (from === to) {
-            return false;
-        }
+            let edgeKey;
+            // --- DIRECTED GRAPH ---
+            if (graph.type === 'directed') {
 
-        let edgeKey;
+                // Direction matters:
+                // A->B != B->A
+                edgeKey = `${from}->${to}`;
 
-        // --- DIRECTED GRAPH ---
-        if (graph.type === 'directed') {
-
-            // Direction matters:
-            // A->B != B->A
-            edgeKey = `${from}->${to}`;
-
-        }
-        // --- UNDIRECTED GRAPH ---
-        else {
-
-            // Direction does NOT matter:
-            // A-B == B-A
-            //
-            // Normalize the order so both
-            // representations generate
-            // the exact same key.
-            if (from < to) {
-                edgeKey = `${from}-${to}`;
-            } else {
-                edgeKey = `${to}-${from}`;
             }
-        }
+            // --- UNDIRECTED GRAPH ---
+            else {
 
-        // --- CHECK 2: PARALLEL EDGES ---
-        // If this connection already exists,
-        // the graph is NOT simple.
-        if (seenEdges.has(edgeKey)) {
-            return false;
-        }
+                // Direction does NOT matter:
+                // A-B == B-A
+                //
+                // Normalize the order so both
+                // representations generate
+                // the exact same key.
+                if (from < to) {// Note: javascript can detect the minor and major string per alphabetic. XD, crazy
+                    edgeKey = `${from}-${to}`;
+                } else {
+                    edgeKey = `${to}-${from}`;
+                }
+            }
 
-        // Store the connection for future checks.
-        seenEdges.add(edgeKey);
+            // --- CHECK 2: PARALLEL EDGES ---
+            // If this connection already exists,
+            // the graph is NOT simple.
+            if (seenEdges.has(edgeKey)) {
+                return false;
+            }
+
+            // Store the connection for future checks.
+            seenEdges.add(edgeKey);
     }
 
     // If no invalid structures were found,
